@@ -1,41 +1,48 @@
-import axios from 'axios';
+import axios from "axios";
+
+const baseURL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   withCredentials: true,
 });
 
 // Add access token to every request if present
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access') || sessionStorage.getItem('access');
+  const token =
+    localStorage.getItem("access") || sessionStorage.getItem("access");
   if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`;
+    config.headers["Authorization"] = `Bearer ${token}`;
   }
   return config;
 });
 
 // Interceptor for refreshing token on 401
 api.interceptors.response.use(
-  res => res,
-  async error => {
+  (res) => res,
+  async (error) => {
     const originalRequest = error.config;
-    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
       try {
-        const refreshRes = await api.get('/auth/refresh');
+        const refreshRes = await api.get("/auth/refresh");
         // If server returns new access token, save it (if needed)
         if (refreshRes.data?.access) {
-          localStorage.setItem('access', refreshRes.data.access);
-          sessionStorage.setItem('access', refreshRes.data.access);
+          localStorage.setItem("access", refreshRes.data.access);
+          sessionStorage.setItem("access", refreshRes.data.access);
         }
         // Repeat original request
         return api(originalRequest);
       } catch (refreshError) {
         // If refresh fails — redirect to login or handle logout
-        window.location.href = '/sign-in';
+        window.location.href = "/sign-in";
         return Promise.reject(refreshError);
       }
     }
@@ -44,8 +51,8 @@ api.interceptors.response.use(
 );
 
 export function getImageUrl(type, filename) {
-  if (!filename) return '';
+  if (!filename) return "";
   return `${api.defaults.baseURL}/image/photo/${type}/${filename}`;
 }
 
-export default api; 
+export default api;

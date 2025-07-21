@@ -1,40 +1,28 @@
-import { useState, useEffect } from 'react';
 import { Card, Button } from "../../shared/ui";
 import styles from "./DashboardPage.module.css";
-import api from '../../shared/lib/axios';
+import {
+  useDashboardStats,
+  useDashboardActivity,
+} from "../../shared/hooks/useDashboard";
 
 export const DashboardPage = () => {
-  const [stats, setStats] = useState({ activeUsers: '-', activeStreams: '-', activeGuilds: '-' });
-  const [activity, setActivity] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const {
+    stats,
+    loading: statsLoading,
+    error: statsError,
+  } = useDashboardStats();
+  const {
+    activity,
+    loading: activityLoading,
+    error: activityError,
+  } = useDashboardActivity();
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await api.get('/user/statistic-blocks');
-        setStats(res.data);
-      } catch {}
-    };
-    fetchStats();
-  }, []);
-
-  useEffect(() => {
-    const fetchLogs = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const res = await api.get('/user/activity-logs');
-        setActivity(res.data);
-      } catch {
-        setError('Failed to load activity logs');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLogs();
-  }, []);
-
+  if (statsLoading || activityLoading) {
+    return <div>Loading...</div>;
+  }
+  if (statsError || activityError) {
+    return <div>Error loading dashboard data</div>;
+  }
   return (
     <div className={styles.dashboard}>
       <div className={styles.header}>
@@ -75,18 +63,19 @@ export const DashboardPage = () => {
         </div>
 
         <div className={styles.activityList}>
-          {loading ? (
+          {activityLoading ? (
             <div className={styles.activityMessage}>Loading...</div>
-          ) : error ? (
-            <div className={styles.activityMessage}>{error}</div>
+          ) : activityError ? (
+            <div className={styles.activityMessage}>{activityError}</div>
           ) : activity.length === 0 ? (
             <div className={styles.activityMessage}>No activity logs</div>
-          ) : [...activity].reverse().map((log, i) => {
+          ) : (
+            [...activity].reverse().map((log, i) => {
               let dotClass = styles.info;
-              const action = log.action?.toLowerCase() || '';
-              if (action.includes('unblocked')) dotClass = styles.success;
-              else if (action.includes('warning')) dotClass = styles.warning;
-              else if (action.includes('blocked')) dotClass = styles.error;
+              const action = log.action?.toLowerCase() || "";
+              if (action.includes("unblocked")) dotClass = styles.success;
+              else if (action.includes("warning")) dotClass = styles.warning;
+              else if (action.includes("blocked")) dotClass = styles.error;
               return (
                 <div key={log.id || i} className={styles.activityItem}>
                   <div className={`${styles.activityDot} ${dotClass}`} />
@@ -96,7 +85,8 @@ export const DashboardPage = () => {
                   </div>
                 </div>
               );
-            })}
+            })
+          )}
         </div>
       </Card>
     </div>

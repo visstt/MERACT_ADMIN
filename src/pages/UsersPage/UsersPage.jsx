@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, Button } from "../../shared/ui";
 import styles from "./UsersPage.module.css";
-import api from "../../shared/lib/axios";
+import { useUsers, useUserActions } from "../../shared/hooks/useUsers";
+import { useUserLogs } from "../../shared/hooks/useUserLogs";
 
 const STATUS_MAP = {
   ACTIVE: "active",
@@ -10,43 +11,19 @@ const STATUS_MAP = {
 };
 
 export const UsersPage = () => {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isMobileCardView, setIsMobileCardView] = useState(false);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const res = await api.get("/user/all-users");
-        // Convert data to required UI format
-        setUsers(
-          res.data
-            .map((u) => ({
-              id: u.id,
-              username: u.login || u.email,
-              email: u.email,
-              status: STATUS_MAP[u.status] || "active",
-              lastActive: u.lastActivity,
-              warnings: u.warnings,
-              streamCount: u.streams,
-              followers: u.followers,
-            }))
-            .sort((a, b) => a.email.localeCompare(b.email))
-        );
-      } catch (e) {
-        setError("Failed to load users");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUsers();
-  }, []);
+  const [logsModalUser, setLogsModalUser] = useState(null);
+  const { users, loading, error, fetchUsers, setUsers } = useUsers();
+  const { userAction, loading: actionLoading } = useUserActions(fetchUsers);
+  const {
+    logs,
+    loading: logsLoading,
+    error: logsError,
+    fetchUserLogs,
+  } = useUserLogs();
 
   useEffect(() => {
     const checkMobile = () => setIsMobileCardView(window.innerWidth <= 480);
@@ -64,35 +41,16 @@ export const UsersPage = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const handleUserAction = async (userId, action) => {
-    let url = "";
-    if (action === "warn") url = `/user/issue-warning?userId=${userId}`;
-    if (action === "block") url = `/user/block-user?userId=${userId}`;
-    if (action === "unblock") url = `/user/unblock-user?userId=${userId}`;
-    if (action === "delete") url = `/user/delete-user?userId=${userId}`;
-    try {
-      await api.post(url);
-      // Refresh users after action
-      const res = await api.get("/user/all-users");
-      setUsers(
-        res.data
-          .map((u) => ({
-            id: u.id,
-            username: u.login || u.email,
-            email: u.email,
-            status: STATUS_MAP[u.status] || "active",
-            lastActive: u.lastActivity,
-            warnings: u.warnings,
-            streamCount: u.streams,
-            followers: u.followers,
-          }))
-          .sort((a, b) => a.email.localeCompare(b.email))
-      );
-    } catch (e) {
-      alert("Action failed");
-    }
+  const handleUserRowClick = async (user) => {
+    setLogsModalUser(user);
+    await fetchUserLogs(user.id);
   };
-
+  const handleUserAction = async (userId, action) => {
+    await userAction(userId, action);
+  };
+  const closeLogsModal = () => {
+    setLogsModalUser(null);
+  };
   const handleSelectUser = (userId) => {
     setSelectedUsers((prev) =>
       prev.includes(userId)
@@ -100,21 +58,18 @@ export const UsersPage = () => {
         : [...prev, userId]
     );
   };
-
   const handleBulkAction = (action) => {
     selectedUsers.forEach((userId) => {
       handleUserAction(userId, action);
     });
     setSelectedUsers([]);
   };
-
   const getStatusBadge = (status) => {
     const statusConfig = {
       active: { label: "Active", className: "success" },
       warning: { label: "Warning", className: "warning" },
       blocked: { label: "Blocked", className: "error" },
     };
-
     const config = statusConfig[status] || statusConfig.active;
     return (
       <span className={`${styles.statusBadge} ${styles[config.className]}`}>
@@ -125,6 +80,54 @@ export const UsersPage = () => {
 
   return (
     <div className={styles.usersPage}>
+      {logsModalUser && (
+        <div className={styles.modalOverlay} onClick={closeLogsModal}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>
+                User logs: {logsModalUser.username || logsModalUser.email}
+              </h2>
+              <button onClick={closeLogsModal} className={styles.closeButton}>
+                ×
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              {logsLoading ? (
+                <div>Loading...</div>
+              ) : logsError ? (
+                <div style={{ color: "red" }}>{logsError}</div>
+              ) : logs.length === 0 ? (
+                <div>No logs for this user</div>
+              ) : (
+                <div className={styles.activityList}>
+                  {[...logs].reverse().map((log, i) => {
+                    let dotClass = styles.info;
+                    const action = log.action?.toLowerCase() || "";
+                    if (action.includes("unblocked")) dotClass = styles.success;
+                    else if (action.includes("warning"))
+                      dotClass = styles.warning;
+                    else if (action.includes("blocked"))
+                      dotClass = styles.error;
+                    return (
+                      <div key={log.id || i} className={styles.activityItem}>
+                        <div className={`${styles.activityDot} ${dotClass}`} />
+                        <div className={styles.activityContent}>
+                          <div className={styles.activityMessage}>
+                            {log.action}
+                          </div>
+                          <div className={styles.activityTime}>
+                            {log.timeAgo}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>User Management</h1>
@@ -231,12 +234,18 @@ export const UsersPage = () => {
                     className={
                       selectedUsers.includes(user.id) ? styles.selected : ""
                     }
+                    onClick={() => handleUserRowClick(user)}
+                    style={{ cursor: "pointer" }}
                   >
                     <td>
                       <input
                         type="checkbox"
                         checked={selectedUsers.includes(user.id)}
-                        onChange={() => handleSelectUser(user.id)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleSelectUser(user.id);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
                       />
                     </td>
                     <td>
@@ -268,7 +277,10 @@ export const UsersPage = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleUserAction(user.id, "warn")}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUserAction(user.id, "warn");
+                          }}
                           disabled={user.status === "blocked"}
                         >
                           ⚠️
@@ -276,19 +288,23 @@ export const UsersPage = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             handleUserAction(
                               user.id,
                               user.status === "blocked" ? "unblock" : "block"
-                            )
-                          }
+                            );
+                          }}
                         >
                           {user.status === "blocked" ? "✅" : "🚫"}
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleUserAction(user.id, "delete")}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUserAction(user.id, "delete");
+                          }}
                         >
                           🗑️
                         </Button>
@@ -314,7 +330,12 @@ export const UsersPage = () => {
       {isMobileCardView && (
         <div className={styles.userCards}>
           {filteredUsers.map((user) => (
-            <div key={user.id} className={styles.userCard}>
+            <div
+              key={user.id}
+              className={styles.userCard}
+              onClick={() => handleUserRowClick(user)}
+              style={{ cursor: "pointer" }}
+            >
               <div className={styles.userCardHeader}>
                 <div className={styles.userCardAvatar}>
                   {user.username.charAt(0).toUpperCase()}
@@ -337,7 +358,10 @@ export const UsersPage = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleUserAction(user.id, "warn")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUserAction(user.id, "warn");
+                  }}
                   disabled={user.status === "blocked"}
                 >
                   ⚠️
@@ -345,19 +369,23 @@ export const UsersPage = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() =>
+                  onClick={(e) => {
+                    e.stopPropagation();
                     handleUserAction(
                       user.id,
                       user.status === "blocked" ? "unblock" : "block"
-                    )
-                  }
+                    );
+                  }}
                 >
                   {user.status === "blocked" ? "✅" : "🚫"}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleUserAction(user.id, "delete")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUserAction(user.id, "delete");
+                  }}
                 >
                   🗑️
                 </Button>

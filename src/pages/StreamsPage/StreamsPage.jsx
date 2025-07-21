@@ -1,7 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, Button } from "../../shared/ui";
 import styles from "./StreamsPage.module.css";
-import api, { getImageUrl } from "../../shared/lib/axios";
+import { getImageUrl } from "../../shared/lib/axios";
+import {
+  useStreams,
+  useStreamStats,
+  useTerminateStream,
+} from "../../shared/hooks/useStreams";
 
 const STATUS_MAP = {
   ONLINE: "live",
@@ -9,66 +14,40 @@ const STATUS_MAP = {
 };
 
 export const StreamsPage = () => {
-  const [streams, setStreams] = useState([]);
-  const [stats, setStats] = useState({
-    activeStreams: 0,
-    allSpectators: "-",
-    adminBlocked: "-",
-  });
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const {
+    streams,
+    loading: streamsLoading,
+    error: streamsError,
+    fetchStreams,
+  } = useStreams();
+  const {
+    stats,
+    loading: statsLoading,
+    error: statsError,
+    fetchStats,
+  } = useStreamStats();
+  const { terminate, loading: terminateLoading } = useTerminateStream();
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const [streamsRes, statsRes] = await Promise.all([
-        api.get("/stream/get-streams"),
-        api.get("/stream/statistic"),
-      ]);
-      setStreams(
-        streamsRes.data.map((s) => ({
-          id: s.id,
-          title: s.name,
-          streamer: s.user,
-          viewers: s.spectators === "NOT_IMPLEMENTED" ? 0 : s.spectators,
-          duration: s.duration,
-          status: STATUS_MAP[s.status] || "live",
-          category: s.category,
-          thumbnailUrl: s.previewFileName,
-          startTime: "qwerty", // TODO: add startTime field if available
-        }))
-      );
-      setStats(statsRes.data);
-    } catch (e) {
-      setError("Failed to load streams");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredStreams = streams.filter((stream) => {
-    const matchesStatus =
-      statusFilter === "all" || stream.status === statusFilter;
-    const matchesCategory =
-      categoryFilter === "all" || stream.category === categoryFilter;
-    return matchesStatus && matchesCategory;
-  });
+  const filteredStreams = streams
+    .map((s) => ({
+      ...s,
+      status: STATUS_MAP[s.status] || s.status,
+    }))
+    .filter((stream) => {
+      const matchesStatus =
+        statusFilter === "all" || stream.status === statusFilter;
+      const matchesCategory =
+        categoryFilter === "all" || stream.category === categoryFilter;
+      return matchesStatus && matchesCategory;
+    });
 
   const handleStreamAction = async (streamId, action) => {
     if (action === "terminate") {
-      try {
-        await api.post(`/stream/stop-stream?id=${streamId}`);
-        await fetchData();
-      } catch (e) {
-        alert("Failed to stop stream");
-      }
+      await terminate(streamId);
+      await fetchStreams();
+      await fetchStats();
     }
     // warn — not implemented
   };
@@ -88,16 +67,22 @@ export const StreamsPage = () => {
     );
   };
 
-  const terminateAllStreams = () => {
-    setStreams(
-      streams.map((stream) =>
-        stream.status === "live"
-          ? { ...stream, status: "terminated", viewers: 0 }
-          : stream
-      )
-    );
-  };
+  // const terminateAllStreams = () => {
+  //   setStreams(
+  //     streams.map((stream) =>
+  //       stream.status === "live"
+  //         ? { ...stream, status: "terminated", viewers: 0 }
+  //         : stream
+  //     )
+  //   );
+  // };
 
+  if (streamsLoading || statsLoading) {
+    return <div>Loading...</div>;
+  }
+  if (streamsError || statsError) {
+    return <div>Error loading streams or stats</div>;
+  }
   return (
     <div className={styles.streamsPage}>
       <div className={styles.header}>

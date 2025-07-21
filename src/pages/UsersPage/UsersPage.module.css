@@ -1,3 +1,168 @@
+[data-theme="dark"] .modal {
+  background: var(--color-dark-surface);
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+[data-theme="dark"] .modalHeader {
+  border-bottom: 1px solid var(--color-dark-border);
+}
+[data-theme="dark"] .modalHeader h2 {
+  color: #f9fafb;
+}
+[data-theme="dark"] .closeButton {
+  color: #e5e7eb;
+}
+[data-theme="dark"] .closeButton:hover {
+  color: var(--color-error);
+}
+[data-theme="dark"] .modalBody {
+  color: #f3f4f6;
+}
+[data-theme="dark"] .activityMessage {
+  color: #f3f4f6;
+}
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: var(--color-bg, #fff);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  max-width: 480px;
+  width: 100%;
+  padding: 0;
+  animation: modalPop 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes modalPop {
+  from {
+    transform: translateY(40px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg) var(--spacing-xl) var(--spacing-md)
+    var(--spacing-xl);
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.modalHeader h2 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+  color: var(--color-gray-800);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-gray-400);
+  cursor: pointer;
+  transition: color 0.15s;
+  padding: 0 0.5rem;
+}
+.closeButton:hover {
+  color: var(--color-error);
+}
+
+.modalBody {
+  padding: var(--spacing-xl);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.activityItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast);
+}
+
+.activityDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+.activityDot.info {
+  background-color: var(--color-info);
+}
+.activityDot.success {
+  background-color: var(--color-success);
+}
+.activityDot.warning {
+  background-color: var(--color-warning);
+}
+.activityDot.error {
+  background-color: var(--color-error);
+}
+
+.activityContent {
+  flex: 1;
+  min-width: 0;
+}
+.activityMessage {
+  font-size: var(--font-size-base);
+  color: var(--color-gray-800);
+  margin-bottom: var(--spacing-xs);
+  line-height: var(--line-height-normal);
+}
+.activityTime {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+}
+
+@media (max-width: 600px) {
+  .modal {
+    max-width: 98vw;
+    padding: 0;
+  }
+  .modalHeader,
+  .modalBody {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+}
 .usersPage {
   padding: var(--spacing-xl);
   width: calc(100vw - 280px); /* sidebar width */
@@ -434,7 +599,8 @@
     flex-direction: column;
     gap: var(--spacing-xs);
   }
-  .searchInput, .filterSelect {
+  .searchInput,
+  .filterSelect {
     min-width: 0;
     width: 100%;
     font-size: 0.95rem;
@@ -442,7 +608,8 @@
   }
 }
 
-.table th, .table td {
+.table th,
+.table td {
   padding: 6px 8px;
   font-size: 0.97rem;
 }
@@ -484,7 +651,7 @@
   .userCard {
     background: #fff;
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     padding: var(--spacing-md);
     display: flex;
     flex-direction: column;
