@@ -2,13 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "../../shared/ui";
 import styles from "./Header.module.css";
 
-export const Header = ({
-  title,
-  sidebarCollapsed,
-  onToggleSidebar,
-  isSidebarOpen,
-  user,
-}) => {
+export const Header = ({ title, onToggleSidebar, isSidebarOpen, user }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
