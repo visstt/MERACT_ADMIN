@@ -1,0 +1,192 @@
+[data-theme="dark"] .adminsPage {
+  background: var(--color-gray-950);
+  color: var(--color-gray-50, #f5f5f7);
+}
+[data-theme="dark"] .header {
+  color: var(--color-gray-50, #f5f5f7);
+}
+[data-theme="dark"] .adminsCard {
+  background: var(--color-gray-900, #18191c);
+  color: var(--color-gray-50, #f5f5f7);
+}
+[data-theme="dark"] .table {
+  background: var(--color-gray-900, #18191c);
+}
+[data-theme="dark"] .table th {
+  background: var(--color-gray-800, #232326) !important;
+  color: var(--color-gray-50, #f5f5f7) !important;
+  border-bottom: 1px solid var(--color-gray-700, #33343a);
+}
+[data-theme="dark"] .table td {
+  background: var(--color-gray-900, #18191c) !important;
+  color: var(--color-gray-50, #f5f5f7) !important;
+  border-bottom: 1px solid var(--color-gray-800, #232326);
+}
+[data-theme="dark"] .modalOverlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+[data-theme="dark"] .modal {
+  background: var(--color-gray-900, #18191c) !important;
+  color: var(--color-gray-50, #f5f5f7);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+[data-theme="dark"] .modalForm input {
+  background: var(--color-gray-800, #232326);
+  color: var(--color-gray-50, #f5f5f7);
+  border: 1px solid var(--color-gray-700, #33343a);
+}
+[data-theme="dark"] .modalForm label {
+  color: var(--color-gray-100, #e5e7eb);
+}
+[data-theme="dark"] .error {
+  color: var(--color-error-dark, #ff6b6b);
+}
+
+.adminsPage {
+  padding: var(--spacing-xl);
+  max-width: 900px;
+  margin: 0 auto;
+  background: #fff;
+  color: var(--color-gray-900, #18191c);
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  color: var(--color-gray-900, #18191c);
+}
+.adminsCard {
+  margin-top: var(--spacing-lg);
+  overflow-x: auto;
+  background: #fff;
+  color: var(--color-gray-900, #18191c);
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+.table th,
+.table td {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-gray-200);
+  text-align: left;
+}
+.table th {
+  background: var(--color-gray-50);
+  font-weight: 600;
+  color: var(--color-gray-900, #18191c);
+}
+.table td {
+  background: #fff;
+  color: var(--color-gray-900, #18191c);
+}
+.table tr:last-child td {
+  border-bottom: none;
+}
+.error {
+  color: var(--color-error);
+  margin-bottom: var(--spacing-md);
+}
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  padding: var(--spacing-xl);
+  min-width: 350px;
+  max-width: 95vw;
+  transition: box-shadow 0.2s, background 0.2s;
+  animation: modalFadeIn 0.2s;
+  color: var(--color-gray-900, #18191c);
+}
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+.modalForm label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: var(--color-gray-800, #232326);
+  margin-bottom: 2px;
+}
+.modalForm label > span {
+  margin-bottom: 4px;
+  text-align: left;
+}
+.modalForm input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: var(--radius-md, 6px);
+  border: 1px solid var(--color-gray-300, #d1d5db);
+  background: var(--color-gray-50, #fafbfc);
+  color: var(--color-gray-900, #18191c);
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  margin-bottom: 2px;
+}
+.modalForm input:focus {
+  border-color: var(--color-primary, #4f46e5);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.12);
+}
+.modalActions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+}
+
+@media (max-width: 600px) {
+  .modal {
+    min-width: 0;
+    width: 98vw;
+    padding: var(--spacing-lg);
+  }
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modalForm input {
+  padding: 10px 14px;
+  border-radius: var(--radius-md, 6px);
+  border: 1px solid var(--color-gray-300, #d1d5db);
+  background: var(--color-gray-50, #fafbfc);
+  color: var(--color-gray-900, #18191c);
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
+.modalForm input:focus {
+  border-color: var(--color-primary, #4f46e5);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.12);
+}

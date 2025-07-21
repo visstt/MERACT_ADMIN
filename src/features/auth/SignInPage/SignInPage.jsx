@@ -31,7 +31,7 @@ export const SignInPage = () => {
   };
 
   return (
-    <div className={styles.signInPage}>
+    <div className={styles.signInPage + " " + "signin-theme-wrapper"}>
       <form className={styles.form} onSubmit={handleSubmit}>
         <h2 className={styles.title}>Sign In</h2>
         <label className={styles.label}>

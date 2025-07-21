@@ -1,56 +1,43 @@
 import { useState } from "react";
 import styles from "./Sidebar.module.css";
 
-const menuItems = [
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    icon: "📊",
-    path: "/",
-  },
-  {
-    id: "users",
-    label: "User Management",
-    icon: "👥",
-    path: "/users",
-  },
-  {
-    id: "streams",
-    label: "Streams",
-    icon: "📺",
-    path: "/streams",
-  },
-  {
-    id: "guilds",
-    label: "Guilds",
-    icon: "🏰",
-    path: "/guilds",
-  },
-  // {
-  //   id: "content",
-  //   label: "Content & Media",
-  //   icon: "🎬",
-  //   path: "/content",
-  // },
-  // {
-  //   id: "moderation",
-  //   label: "Moderation",
-  //   icon: "🛡️",
-  //   path: "/moderation",
-  // },
-  // {
-  //   id: "analytics",
-  //   label: "Analytics",
-  //   icon: "📈",
-  //   path: "/analytics",
-  // },
-  // {
-  //   id: "settings",
-  //   label: "System Settings",
-  //   icon: "⚙️",
-  //   path: "/settings",
-  // },
-];
+function getMenuItems(user) {
+  const items = [
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: "📊",
+      path: "/",
+    },
+    {
+      id: "users",
+      label: "User Management",
+      icon: "👥",
+      path: "/users",
+    },
+    {
+      id: "streams",
+      label: "Streams",
+      icon: "📺",
+      path: "/streams",
+    },
+    {
+      id: "guilds",
+      label: "Guilds",
+      icon: "🏰",
+      path: "/guilds",
+    },
+  ];
+  if (user?.role?.name === "main admin") {
+    items.push({
+      id: "admins",
+      label: "Admins",
+      icon: "👮",
+      path: "/admins",
+    });
+  }
+  return items;
+}
 
 export const Sidebar = ({
   activeItem,
@@ -61,6 +48,7 @@ export const Sidebar = ({
   user,
 }) => {
   const userName = user?.login || user?.email || "Super Admin";
+  const menuItems = getMenuItems(user);
   return (
     <aside
       className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""} ${
