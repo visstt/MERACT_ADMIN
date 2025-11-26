@@ -10,7 +10,7 @@ export function useStreams() {
     setLoading(true);
     setError("");
     try {
-      const res = await api.get("/stream/get-streams");
+      const res = await api.get("/act/get-acts");
       setStreams(
         res.data.map((s) => ({
           id: s.id,
@@ -51,7 +51,7 @@ export function useStreamStats() {
     setLoading(true);
     setError("");
     try {
-      const res = await api.get("/stream/statistic");
+      const res = await api.get("/act/statistic");
       setStats(res.data);
     } catch (e) {
       setError("Failed to load stats");
@@ -75,7 +75,7 @@ export function useTerminateStream() {
     setLoading(true);
     setError("");
     try {
-      await api.post(`/stream/stop-stream?id=${streamId}`);
+      await api.post(`/act/stop-act?id=${streamId}`);
     } catch (e) {
       setError("Failed to terminate stream");
     } finally {
