@@ -17,6 +17,7 @@ import { useState, useEffect } from "react";
 import api from "../shared/lib/axios";
 import { GuildProfilePage } from "../pages/GuildProfilePage/GuildProfilePage";
 import { AdminsPage } from "../pages/AdminsPage/AdminsPage";
+import { AchievementsPage } from "../pages/AchievementsPage";
 
 function getAccessToken() {
   // Example: look for cookie named access_token (or another name if server uses different one)
@@ -105,6 +106,7 @@ function Layout() {
             <Route path="/guilds" element={<GuildsPage />} />
             <Route path="/guild/:id" element={<GuildProfilePage />} />
             <Route path="/users" element={<UsersPage />} />
+            <Route path="/achievements" element={<AchievementsPage />} />
             {user?.role?.name === "main admin" && (
               <Route path="/admins" element={<AdminsPage />} />
             )}
@@ -117,9 +119,9 @@ function Layout() {
 
 export const AppRoutes = () => (
   <Routes>
-    <Route path="/sign-in" element={<SignInPage />} />
+    <Route path="/admin/sign-in" element={<SignInPage />} />
     <Route
-      path="/*"
+      path="/admin/*"
       element={
         <ProtectedRoute>
           <Layout />

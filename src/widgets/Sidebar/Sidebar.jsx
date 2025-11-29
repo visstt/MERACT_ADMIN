@@ -7,25 +7,31 @@ function getMenuItems(user) {
       id: "dashboard",
       label: "Dashboard",
       icon: "📊",
-      path: "/",
+      path: "/admin/",
     },
     {
       id: "users",
       label: "User Management",
       icon: "👥",
-      path: "/users",
+      path: "/admin/users",
     },
     {
       id: "streams",
       label: "Streams",
       icon: "📺",
-      path: "/streams",
+      path: "/admin/streams",
     },
     {
       id: "guilds",
       label: "Guilds",
       icon: "🏰",
-      path: "/guilds",
+      path: "/admin/guilds",
+    },
+    {
+      id: "achievements",
+      label: "Achievements",
+      icon: "🏆",
+      path: "/admin/achievements",
     },
   ];
   if (user?.role?.name === "main admin") {
@@ -33,7 +39,7 @@ function getMenuItems(user) {
       id: "admins",
       label: "Admins",
       icon: "👮",
-      path: "/admins",
+      path: "/admin/admins",
     });
   }
   return items;

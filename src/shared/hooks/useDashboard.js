@@ -4,7 +4,7 @@ import api from "../lib/axios";
 export function useDashboardStats() {
   const [stats, setStats] = useState({
     activeUsers: "-",
-    activeStreams: "-",
+    activeActs: "-",
     activeGuilds: "-",
   });
   const [loading, setLoading] = useState(true);

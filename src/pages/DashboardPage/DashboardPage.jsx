@@ -42,8 +42,8 @@ export const DashboardPage = () => {
           <div className={styles.statHeader}>
             <span className={styles.statIcon}>📺</span>
           </div>
-          <div className={styles.statValue}>{stats.activeStreams}</div>
-          <div className={styles.statTitle}>Online streams</div>
+          <div className={styles.statValue}>{stats.activeActs}</div>
+          <div className={styles.statTitle}>Active acts</div>
         </Card>
         <Card variant="elevated" className={styles.statCard}>
           <div className={styles.statHeader}>

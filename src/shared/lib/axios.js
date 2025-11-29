@@ -17,6 +17,10 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers["Authorization"] = `Bearer ${token}`;
   }
+  // Если это FormData, удаляем Content-Type чтобы браузер установил правильный с boundary
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  }
   return config;
 });
 
@@ -52,6 +56,10 @@ api.interceptors.response.use(
 
 export function getImageUrl(type, filename) {
   if (!filename) return "";
+  // Если filename уже полный URL, возвращаем его напрямую
+  if (filename.startsWith("http://") || filename.startsWith("https://")) {
+    return filename;
+  }
   return `${api.defaults.baseURL}/image/photo/${type}/${filename}`;
 }
 
