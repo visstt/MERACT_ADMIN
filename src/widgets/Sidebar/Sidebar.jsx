@@ -33,6 +33,12 @@ function getMenuItems(user) {
       icon: "🏆",
       path: "/admin/achievements",
     },
+    {
+      id: "ranks",
+      label: "Ranks",
+      icon: "🎖️",
+      path: "/admin/ranks",
+    },
   ];
   if (user?.role?.name === "main admin") {
     items.push({

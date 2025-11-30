@@ -137,7 +137,7 @@ export const GuildsPage = () => {
             onClick={(e) => {
               // Не переходить по клику на кнопки
               if (e.target.closest("button")) return;
-              navigate(`/guild/${guild.id}`);
+              navigate(`/admin/guild/${guild.id}`);
             }}
           >
             <img

@@ -116,7 +116,7 @@ export const StreamInfoPage = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Button variant="ghost" onClick={() => navigate("/streams")}>
+        <Button variant="ghost" onClick={() => navigate("/admin/streams")}>
           ← Back to Streams
         </Button>
         <h1 className={styles.title}>{stream.name || "Stream Details"}</h1>

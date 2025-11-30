@@ -46,7 +46,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         // If refresh fails — redirect to login or handle logout
-        window.location.href = "/sign-in";
+        window.location.href = "/admin/sign-in";
         return Promise.reject(refreshError);
       }
     }

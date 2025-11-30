@@ -18,6 +18,7 @@ import api from "../shared/lib/axios";
 import { GuildProfilePage } from "../pages/GuildProfilePage/GuildProfilePage";
 import { AdminsPage } from "../pages/AdminsPage/AdminsPage";
 import { AchievementsPage } from "../pages/AchievementsPage";
+import { RanksPage } from "../pages/RanksPage";
 
 function getAccessToken() {
   // Example: look for cookie named access_token (or another name if server uses different one)
@@ -50,7 +51,7 @@ function ProtectedRoute({ children }) {
   }, []);
 
   if (!authChecked) return null;
-  if (!isAuth) return <Navigate to="/sign-in" replace />;
+  if (!isAuth) return <Navigate to="/admin/sign-in" replace />;
   return children;
 }
 
@@ -107,6 +108,7 @@ function Layout() {
             <Route path="/guild/:id" element={<GuildProfilePage />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/achievements" element={<AchievementsPage />} />
+            <Route path="/ranks" element={<RanksPage />} />
             {user?.role?.name === "main admin" && (
               <Route path="/admins" element={<AdminsPage />} />
             )}
@@ -128,5 +130,6 @@ export const AppRoutes = () => (
         </ProtectedRoute>
       }
     />
+    <Route path="*" element={<Navigate to="/admin/" replace />} />
   </Routes>
 );

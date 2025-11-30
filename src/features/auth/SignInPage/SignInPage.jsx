@@ -22,7 +22,7 @@ export const SignInPage = () => {
       // Save user profile
       localStorage.setItem("profile", JSON.stringify(res.data));
       sessionStorage.setItem("profile", JSON.stringify(res.data));
-      navigate("/");
+      navigate("/admin/");
     } catch (err) {
       setError(err.message || "Sign in failed");
     } finally {
