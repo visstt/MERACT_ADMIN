@@ -200,9 +200,13 @@ export const StreamsPage = () => {
                   : ""
               }`}
             >
-              <div 
-                className={`${styles.streamThumbnail} ${stream.status === "live" ? styles.clickable : ""}`}
-                onClick={() => stream.status === "live" && openStreamViewer(stream)}
+              <div
+                className={`${styles.streamThumbnail} ${
+                  stream.status === "live" ? styles.clickable : ""
+                }`}
+                onClick={() =>
+                  stream.status === "live" && openStreamViewer(stream)
+                }
                 title={stream.status === "live" ? "Click to watch stream" : ""}
               >
                 {stream.thumbnailUrl ? (
@@ -227,10 +231,16 @@ export const StreamsPage = () => {
               </div>
 
               <div className={styles.streamInfo}>
-                <h3 
-                  className={`${styles.streamTitle} ${stream.status === "live" ? styles.clickable : ""}`}
-                  onClick={() => stream.status === "live" && openStreamViewer(stream)}
-                  title={stream.status === "live" ? "Click to watch stream" : ""}
+                <h3
+                  className={`${styles.streamTitle} ${
+                    stream.status === "live" ? styles.clickable : ""
+                  }`}
+                  onClick={() =>
+                    stream.status === "live" && openStreamViewer(stream)
+                  }
+                  title={
+                    stream.status === "live" ? "Click to watch stream" : ""
+                  }
                 >
                   {stream.title}
                 </h3>

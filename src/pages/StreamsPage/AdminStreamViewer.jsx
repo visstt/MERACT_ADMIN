@@ -67,9 +67,11 @@ export const AdminStreamViewer = ({ streamData, onClose }) => {
   useEffect(() => {
     delete L.Icon.Default.prototype._getIconUrl;
     L.Icon.Default.mergeOptions({
-      iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+      iconRetinaUrl:
+        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
       iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-      shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+      shadowUrl:
+        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
     });
   }, []);
 
@@ -94,7 +96,12 @@ export const AdminStreamViewer = ({ streamData, onClose }) => {
         setIsConnecting(true);
         setConnectionError(null);
 
-        console.log("Getting viewer token for channel:", channelName, "userId:", userId.current);
+        console.log(
+          "Getting viewer token for channel:",
+          channelName,
+          "userId:",
+          userId.current
+        );
 
         // Get token from API
         const tokenResponse = await api.get(
@@ -105,7 +112,7 @@ export const AdminStreamViewer = ({ streamData, onClose }) => {
 
         // Токен находится в response.data.token (как в рабочем коде)
         const tokenData = tokenResponse.data.token || tokenResponse.data;
-        
+
         const parsedToken = parseJWT(tokenData);
         const uid = parsedToken?.uid || 0;
 
@@ -121,14 +128,25 @@ export const AdminStreamViewer = ({ streamData, onClose }) => {
         );
 
         console.log("✅ Successfully joined channel as viewer");
-        
+
         // Проверяем, есть ли уже пользователи в канале
         const remoteUsers = agoraClient.remoteUsers;
-        console.log("📊 Remote users in channel:", remoteUsers.length, remoteUsers);
-        
+        console.log(
+          "📊 Remote users in channel:",
+          remoteUsers.length,
+          remoteUsers
+        );
+
         // Если есть пользователи, подписываемся на них
         for (const user of remoteUsers) {
-          console.log("👤 Found existing user:", user.uid, "hasVideo:", user.hasVideo, "hasAudio:", user.hasAudio);
+          console.log(
+            "👤 Found existing user:",
+            user.uid,
+            "hasVideo:",
+            user.hasVideo,
+            "hasAudio:",
+            user.hasAudio
+          );
           if (user.hasVideo) {
             await agoraClient.subscribe(user, "video");
             console.log("✅ Subscribed to existing user video:", user.uid);
@@ -144,7 +162,7 @@ export const AdminStreamViewer = ({ streamData, onClose }) => {
 
         // Handle remote users
         console.log("📡 Setting up event listeners for remote users...");
-        
+
         agoraClient.on("user-published", async (user, mediaType) => {
           console.log("🎥 User published:", user.uid, "mediaType:", mediaType);
           await agoraClient.subscribe(user, mediaType);
@@ -203,10 +221,11 @@ export const AdminStreamViewer = ({ streamData, onClose }) => {
     const loadMessages = async () => {
       try {
         // Попробуем разные варианты URL (тихо, без логов ошибок)
-        const response = await api.get(`/act/${streamData.id}/messages`)
+        const response = await api
+          .get(`/act/${streamData.id}/messages`)
           .catch(() => api.get(`/chat/${streamData.id}/messages`))
           .catch(() => null);
-        
+
         if (response?.data) {
           setMessages(response.data);
         }
@@ -276,14 +295,19 @@ export const AdminStreamViewer = ({ streamData, onClose }) => {
 
     try {
       // Попробуем разные варианты URL (тихо)
-      await api.post(`/act/${streamData.id}/message`, {
-        text: newMessage,
-      }).catch(() => api.post(`/chat/send`, {
-        actId: streamData.id,
-        message: newMessage,
-        userId: userId.current,
-      })).catch(() => null);
-      
+      await api
+        .post(`/act/${streamData.id}/message`, {
+          text: newMessage,
+        })
+        .catch(() =>
+          api.post(`/chat/send`, {
+            actId: streamData.id,
+            message: newMessage,
+            userId: userId.current,
+          })
+        )
+        .catch(() => null);
+
       setNewMessage("");
     } catch (error) {
       // Тихо игнорируем ошибки отправки
@@ -355,11 +379,21 @@ export const AdminStreamViewer = ({ streamData, onClose }) => {
                     <div className={styles.videoPlaceholder}>
                       <div className={styles.waitingIcon}>📡</div>
                       <p>Waiting for streamer...</p>
-                      <span className={styles.waitingHint}>The stream will appear when the broadcaster starts</span>
-                      <div style={{ marginTop: '20px', fontSize: '12px', opacity: 0.7 }}>
+                      <span className={styles.waitingHint}>
+                        The stream will appear when the broadcaster starts
+                      </span>
+                      <div
+                        style={{
+                          marginTop: "20px",
+                          fontSize: "12px",
+                          opacity: 0.7,
+                        }}
+                      >
                         <div>Channel: {channelName}</div>
                         <div>Viewer UID: {userId.current}</div>
-                        <div>Remote users: {Object.keys(remoteUsers).length}</div>
+                        <div>
+                          Remote users: {Object.keys(remoteUsers).length}
+                        </div>
                         <div>App ID: {import.meta.env.VITE_AGORA_APP_ID}</div>
                       </div>
                     </div>
@@ -380,15 +414,17 @@ export const AdminStreamViewer = ({ streamData, onClose }) => {
                   </div>
                 </div>
               </div>
-
               <div className={styles.mapSection}>
                 <h3 className={styles.sectionTitle}>Route Map</h3>
-                <button 
+                <button
                   className={styles.openMapButton}
                   onClick={() => setShowMap(true)}
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
+                    <path
+                      d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                      fill="currentColor"
+                    />
                   </svg>
                   <span>Open Full Map</span>
                   {routeCoordinates && (
@@ -396,7 +432,7 @@ export const AdminStreamViewer = ({ streamData, onClose }) => {
                   )}
                 </button>
               </div>
-```
+              ```
             </div>
           </div>
 
@@ -474,7 +510,7 @@ export const AdminStreamViewer = ({ streamData, onClose }) => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             />
-            
+
             {/* Start point */}
             {startLocation && (
               <Circle
@@ -488,7 +524,7 @@ export const AdminStreamViewer = ({ streamData, onClose }) => {
                 }}
               />
             )}
-            
+
             {/* Route */}
             {routeCoordinates && routeCoordinates.length > 0 && (
               <Polyline
@@ -500,7 +536,7 @@ export const AdminStreamViewer = ({ streamData, onClose }) => {
                 }}
               />
             )}
-            
+
             {/* Destination */}
             {destinationLocation && (
               <Marker
