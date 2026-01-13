@@ -6,7 +6,9 @@ import {
   useStreams,
   useStreamStats,
   useTerminateStream,
+  useAddLikes,
 } from "../../shared/hooks/useStreams";
+import { AdminStreamViewer } from "./AdminStreamViewer";
 
 const STATUS_MAP = {
   ONLINE: "live",
@@ -16,6 +18,13 @@ const STATUS_MAP = {
 export const StreamsPage = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [likesModal, setLikesModal] = useState({
+    show: false,
+    streamId: null,
+    streamTitle: "",
+  });
+  const [likesCount, setLikesCount] = useState(100);
+  const [viewingStream, setViewingStream] = useState(null);
   const {
     streams,
     loading: streamsLoading,
@@ -29,6 +38,7 @@ export const StreamsPage = () => {
     fetchStats,
   } = useStreamStats();
   const { terminate, loading: terminateLoading } = useTerminateStream();
+  const { addLikes, loading: addLikesLoading } = useAddLikes();
 
   const filteredStreams = streams
     .map((s) => ({
@@ -50,6 +60,31 @@ export const StreamsPage = () => {
       await fetchStats();
     }
     // warn — not implemented
+  };
+
+  const handleAddLikes = async () => {
+    if (likesModal.streamId && likesCount > 0) {
+      const success = await addLikes(likesModal.streamId, likesCount);
+      if (success) {
+        await fetchStreams();
+        setLikesModal({ show: false, streamId: null, streamTitle: "" });
+        setLikesCount(100);
+      }
+    }
+  };
+
+  const openLikesModal = (streamId, streamTitle) => {
+    setLikesModal({ show: true, streamId, streamTitle });
+  };
+
+  const openStreamViewer = (stream) => {
+    // Find original stream data with all fields
+    const fullStreamData = streams.find((s) => s.id === stream.id);
+    setViewingStream(fullStreamData);
+  };
+
+  const closeStreamViewer = () => {
+    setViewingStream(null);
   };
 
   const getStatusBadge = (status) => {
@@ -165,10 +200,16 @@ export const StreamsPage = () => {
                   : ""
               }`}
             >
-              <div className={styles.streamThumbnail}>
+              <div 
+                className={`${styles.streamThumbnail} ${stream.status === "live" ? styles.clickable : ""}`}
+                onClick={() => stream.status === "live" && openStreamViewer(stream)}
+                title={stream.status === "live" ? "Click to watch stream" : ""}
+              >
                 {stream.thumbnailUrl ? (
                   <img
-                    src={getImageUrl("stream", stream.thumbnailUrl)}
+                    src={`${import.meta.env.VITE_API_URL}${
+                      stream.thumbnailUrl
+                    }`}
                     alt={stream.title}
                     className={styles.streamImage}
                   />
@@ -186,7 +227,13 @@ export const StreamsPage = () => {
               </div>
 
               <div className={styles.streamInfo}>
-                <h3 className={styles.streamTitle}>{stream.title}</h3>
+                <h3 
+                  className={`${styles.streamTitle} ${stream.status === "live" ? styles.clickable : ""}`}
+                  onClick={() => stream.status === "live" && openStreamViewer(stream)}
+                  title={stream.status === "live" ? "Click to watch stream" : ""}
+                >
+                  {stream.title}
+                </h3>
                 <div className={styles.streamMeta}>
                   <span className={styles.streamerName}>
                     @{stream.streamer}
@@ -196,17 +243,32 @@ export const StreamsPage = () => {
                 </div>
                 <div className={styles.streamStats}>
                   <span>👥 {stream.viewers.toLocaleString()} viewers</span>
+                  <span>❤️ {stream.likes.toLocaleString()} likes</span>
                   <span>⏱️ {stream.duration}</span>
                   <span>🕒 {stream.startTime}</span>
                 </div>
               </div>
 
               <div className={styles.streamActions}>
-                <Button variant="ghost" size="sm" title="View stream">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  title="View stream"
+                  onClick={() => openStreamViewer(stream)}
+                  disabled={stream.status !== "live"}
+                >
                   👁️
                 </Button>
                 <Button variant="ghost" size="sm" title="View chat">
                   💬
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => openLikesModal(stream.id, stream.title)}
+                  title="Add likes"
+                >
+                  ❤️➕
                 </Button>
                 <Button
                   variant="ghost"
@@ -240,6 +302,63 @@ export const StreamsPage = () => {
           )}
         </div>
       </Card>
+
+      {likesModal.show && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() =>
+            setLikesModal({ show: false, streamId: null, streamTitle: "" })
+          }
+        >
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className={styles.modalTitle}>Add Likes</h3>
+            <p className={styles.modalSubtitle}>{likesModal.streamTitle}</p>
+            <div className={styles.modalBody}>
+              <label className={styles.inputLabel}>
+                Number of likes to add:
+              </label>
+              <input
+                type="number"
+                min="1"
+                value={likesCount}
+                onChange={(e) => setLikesCount(parseInt(e.target.value) || 0)}
+                className={styles.inputField}
+              />
+            </div>
+            <div className={styles.modalActions}>
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  setLikesModal({
+                    show: false,
+                    streamId: null,
+                    streamTitle: "",
+                  })
+                }
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleAddLikes}
+                disabled={addLikesLoading || likesCount <= 0}
+              >
+                {addLikesLoading ? "Adding..." : "Add Likes"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {viewingStream && (
+        <AdminStreamViewer
+          streamData={viewingStream}
+          onClose={closeStreamViewer}
+        />
+      )}
     </div>
   );
 };

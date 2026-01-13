@@ -137,6 +137,16 @@
 .streamThumbnail {
   position: relative;
   flex-shrink: 0;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.streamThumbnail.clickable {
+  cursor: pointer;
+}
+
+.streamThumbnail.clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .thumbnailPlaceholder {
@@ -165,7 +175,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -186,6 +197,16 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color var(--transition-fast);
+}
+
+.streamTitle.clickable {
+  cursor: pointer;
+}
+
+.streamTitle.clickable:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
 }
 
 .streamMeta {
@@ -286,7 +307,7 @@
   font-size: 0.95rem;
   font-weight: 600;
   z-index: 2;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   gap: 0.4em;
@@ -410,7 +431,7 @@
     flex-wrap: wrap;
     gap: var(--spacing-md);
   }
-  
+
   .streamActions {
     width: 100%;
     justify-content: flex-end;
@@ -421,44 +442,44 @@
   .streamsPage {
     padding: var(--spacing-md);
   }
-  
+
   .header {
     flex-direction: column;
     gap: var(--spacing-md);
     align-items: stretch;
   }
-  
+
   .headerActions {
     flex-direction: column;
   }
-  
+
   .title {
     font-size: var(--font-size-2xl);
   }
-  
+
   .statsCards {
     grid-template-columns: 1fr;
     gap: var(--spacing-md);
   }
-  
+
   .filters {
     flex-direction: column;
   }
-  
+
   .filterSelect {
     min-width: auto;
   }
-  
+
   .streamItem {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .thumbnailPlaceholder {
     width: 100%;
     height: 150px;
   }
-  
+
   .streamActions {
     width: 100%;
     justify-content: space-between;
@@ -469,16 +490,16 @@
   .streamsPage {
     padding: var(--spacing-sm);
   }
-  
+
   .streamItem {
     padding: var(--spacing-md);
   }
-  
+
   .streamStats {
     flex-direction: column;
     gap: var(--spacing-xs);
   }
-  
+
   .streamActions {
     flex-wrap: wrap;
     gap: var(--spacing-xs);
@@ -517,7 +538,8 @@
     gap: var(--spacing-xs);
     padding: var(--spacing-md);
   }
-  .streamImage, .thumbnailPlaceholder {
+  .streamImage,
+  .thumbnailPlaceholder {
     width: 100%;
     height: 140px;
     min-width: 0;
@@ -542,4 +564,76 @@
   .cardTitle {
     font-size: 1.1rem;
   }
+}
+
+/* Modal styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-md);
+}
+
+.modalContent {
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modalTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-800);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.modalSubtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-gray-600);
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.modalBody {
+  margin-bottom: var(--spacing-lg);
+}
+
+.inputLabel {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-700);
+  margin-bottom: var(--spacing-sm);
+}
+
+.inputField {
+  width: 100%;
+  height: 44px;
+  padding: 0 var(--spacing-md);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  transition: border-color var(--transition-fast);
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.modalActions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
 }

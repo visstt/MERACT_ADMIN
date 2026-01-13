@@ -10,18 +10,29 @@ export function useStreams() {
     setLoading(true);
     setError("");
     try {
-      const res = await api.get("/act/get-acts");
+      const res = await api.get("/admin/streams/active");
       setStreams(
         res.data.map((s) => ({
           id: s.id,
-          title: s.name,
-          streamer: s.user,
-          viewers: s.spectators === "NOT_IMPLEMENTED" ? 0 : s.spectators,
-          duration: s.duration,
+          title: s.title,
+          streamer: s.streamerName || s.user?.email || "Unknown",
+          streamerName: s.streamerName || s.user?.email || "Unknown",
+          viewers: s.connectedUsers || 0,
+          connectedUsers: s.connectedUsers || 0,
+          duration: s.duration || "-",
           status: s.status,
-          category: s.category,
+          category: s.categoryId || "-",
           thumbnailUrl: s.previewFileName,
-          startTime: s.startTime || null,
+          startTime: s.startedAt ? new Date(s.startedAt).toLocaleString() : "-",
+          likes: s.likes || 0,
+          // Additional fields for stream viewer
+          startLatitude: s.startLatitude,
+          startLongitude: s.startLongitude,
+          destinationLatitude: s.destinationLatitude,
+          destinationLongitude: s.destinationLongitude,
+          startedAt: s.startedAt,
+          userId: s.userId,
+          user: s.user,
         }))
       );
     } catch (e) {
@@ -84,4 +95,25 @@ export function useTerminateStream() {
   }, []);
 
   return { terminate, loading, error };
+}
+
+export function useAddLikes() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const addLikes = useCallback(async (actId, count) => {
+    setLoading(true);
+    setError("");
+    try {
+      await api.post(`/admin/streams/${actId}/add-likes`, { count });
+      return true;
+    } catch (e) {
+      setError("Failed to add likes");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { addLikes, loading, error };
 }
