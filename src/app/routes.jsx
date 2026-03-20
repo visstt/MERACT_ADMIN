@@ -19,6 +19,12 @@ import { GuildProfilePage } from "../pages/GuildProfilePage/GuildProfilePage";
 import { AdminsPage } from "../pages/AdminsPage/AdminsPage";
 import { AchievementsPage } from "../pages/AchievementsPage";
 import { RanksPage } from "../pages/RanksPage";
+import { ShopPage } from "../pages/ShopPage";
+import { HeroVideoPage } from "../pages/HeroVideoPage";
+import { AdminChatPage } from "../pages/AdminChatPage";
+import { TasksPage } from "../pages/TasksPage";
+import { IntroPage } from "../pages/IntroPage";
+import { PoliciesPage } from "../pages/PoliciesPage";
 
 function getAccessToken() {
   // Example: look for cookie named access_token (or another name if server uses different one)
@@ -66,7 +72,7 @@ function Layout() {
     let profile = null;
     try {
       profile = JSON.parse(
-        localStorage.getItem("profile") || sessionStorage.getItem("profile")
+        localStorage.getItem("profile") || sessionStorage.getItem("profile"),
       );
     } catch {}
     setUser(profile);
@@ -109,8 +115,16 @@ function Layout() {
             <Route path="/users" element={<UsersPage />} />
             <Route path="/achievements" element={<AchievementsPage />} />
             <Route path="/ranks" element={<RanksPage />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/chat" element={<AdminChatPage />} />
+            <Route path="/tasks" element={<TasksPage />} />
+            <Route path="/intros" element={<IntroPage />} />
+            <Route path="/policies" element={<PoliciesPage />} />
             {user?.role?.name === "main admin" && (
               <Route path="/admins" element={<AdminsPage />} />
+            )}
+            {user?.role?.name === "main admin" && (
+              <Route path="/hero-video" element={<HeroVideoPage />} />
             )}
           </Routes>
         </main>

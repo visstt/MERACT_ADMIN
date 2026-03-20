@@ -39,6 +39,36 @@ function getMenuItems(user) {
       icon: "🎖️",
       path: "/admin/ranks",
     },
+    {
+      id: "shop",
+      label: "Shop",
+      icon: "🛒",
+      path: "/admin/shop",
+    },
+    {
+      id: "chat",
+      label: "Admin Chat",
+      icon: "💬",
+      path: "/admin/chat",
+    },
+    {
+      id: "tasks",
+      label: "Tasks",
+      icon: "✅",
+      path: "/admin/tasks",
+    },
+    {
+      id: "intros",
+      label: "Intro Videos",
+      icon: "🎥",
+      path: "/admin/intros",
+    },
+    {
+      id: "policies",
+      label: "Policies",
+      icon: "📄",
+      path: "/admin/policies",
+    },
   ];
   if (user?.role?.name === "main admin") {
     items.push({
@@ -46,6 +76,12 @@ function getMenuItems(user) {
       label: "Admins",
       icon: "👮",
       path: "/admin/admins",
+    });
+    items.push({
+      id: "hero-video",
+      label: "Hero Video",
+      icon: "🎬",
+      path: "/admin/hero-video",
     });
   }
   return items;

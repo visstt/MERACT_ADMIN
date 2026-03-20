@@ -23,13 +23,14 @@ export function useUsers() {
             id: u.id,
             username: u.login || u.email,
             email: u.email,
+            avatarUrl: u.avatarUrl || null,
             status: STATUS_MAP[u.status] || "active",
             lastActive: u.lastActivity,
             warnings: u.warnings,
             streamCount: u.streams,
             followers: u.followers,
           }))
-          .sort((a, b) => a.email.localeCompare(b.email))
+          .sort((a, b) => a.email.localeCompare(b.email)),
       );
     } catch (e) {
       setError("Failed to load users");
@@ -67,8 +68,33 @@ export function useUserActions(fetchUsers) {
         setLoading(false);
       }
     },
-    [fetchUsers]
+    [fetchUsers],
   );
 
   return { userAction, loading, error };
+}
+
+export function useAdjustUser() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const adjustUser = useCallback(async (userId, amount, type) => {
+    setLoading(true);
+    setError("");
+    const url =
+      type === "points"
+        ? "/admin/users/adjust-points"
+        : "/admin/users/adjust-balance";
+    try {
+      const res = await api.post(url, { userId, amount });
+      return res.data;
+    } catch (e) {
+      setError("Failed to adjust");
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { adjustUser, loading, error };
 }

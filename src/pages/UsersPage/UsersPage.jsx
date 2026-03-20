@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import { Card, Button } from "../../shared/ui";
 import styles from "./UsersPage.module.css";
-import { useUsers, useUserActions } from "../../shared/hooks/useUsers";
+import {
+  useUsers,
+  useUserActions,
+  useAdjustUser,
+} from "../../shared/hooks/useUsers";
 import { useUserLogs } from "../../shared/hooks/useUserLogs";
+import api from "../../shared/lib/axios";
+import { toast } from "react-toastify";
 
 const STATUS_MAP = {
   ACTIVE: "active",
@@ -16,8 +22,12 @@ export const UsersPage = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isMobileCardView, setIsMobileCardView] = useState(false);
   const [logsModalUser, setLogsModalUser] = useState(null);
+  const [adjustModalUser, setAdjustModalUser] = useState(null);
+  const [adjustAmount, setAdjustAmount] = useState("");
+  const [adjustType, setAdjustType] = useState("points");
   const { users, loading, error, fetchUsers, setUsers } = useUsers();
   const { userAction, loading: actionLoading } = useUserActions(fetchUsers);
+  const { adjustUser, loading: adjustLoading } = useAdjustUser();
   const {
     logs,
     loading: logsLoading,
@@ -51,11 +61,38 @@ export const UsersPage = () => {
   const closeLogsModal = () => {
     setLogsModalUser(null);
   };
+
+  const handleOpenAdjustModal = (e, user) => {
+    e.stopPropagation();
+    setAdjustModalUser(user);
+    setAdjustAmount("");
+    setAdjustType("points");
+  };
+
+  const handleCloseAdjustModal = () => {
+    setAdjustModalUser(null);
+  };
+
+  const handleAdjust = async () => {
+    if (!adjustModalUser || !adjustAmount) return;
+    try {
+      await adjustUser(
+        adjustModalUser.id,
+        parseInt(adjustAmount, 10),
+        adjustType,
+      );
+      const label = adjustType === "points" ? "Impulses" : "Echo";
+      toast.success(`${label} updated for ${adjustModalUser.username}`);
+      handleCloseAdjustModal();
+    } catch {
+      toast.error("Failed to adjust");
+    }
+  };
   const handleSelectUser = (userId) => {
     setSelectedUsers((prev) =>
       prev.includes(userId)
         ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
+        : [...prev, userId],
     );
   };
   const handleBulkAction = (action) => {
@@ -251,7 +288,15 @@ export const UsersPage = () => {
                     <td>
                       <div className={styles.userInfo}>
                         <div className={styles.userAvatar}>
-                          {user.username.charAt(0).toUpperCase()}
+                          {user.avatarUrl ? (
+                            <img
+                              src={user.avatarUrl}
+                              alt={user.username}
+                              className={styles.userAvatarImg}
+                            />
+                          ) : (
+                            user.username.charAt(0).toUpperCase()
+                          )}
                         </div>
                         <div>
                           <div className={styles.username}>{user.username}</div>
@@ -292,7 +337,7 @@ export const UsersPage = () => {
                             e.stopPropagation();
                             handleUserAction(
                               user.id,
-                              user.status === "blocked" ? "unblock" : "block"
+                              user.status === "blocked" ? "unblock" : "block",
                             );
                           }}
                         >
@@ -307,6 +352,14 @@ export const UsersPage = () => {
                           }}
                         >
                           🗑️
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          title="Adjust points / balance"
+                          onClick={(e) => handleOpenAdjustModal(e, user)}
+                        >
+                          💰
                         </Button>
                       </div>
                     </td>
@@ -338,7 +391,15 @@ export const UsersPage = () => {
             >
               <div className={styles.userCardHeader}>
                 <div className={styles.userCardAvatar}>
-                  {user.username.charAt(0).toUpperCase()}
+                  {user.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt={user.username}
+                      className={styles.userAvatarImg}
+                    />
+                  ) : (
+                    user.username.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div className={styles.userCardInfo}>
                   <div className={styles.userCardName}>{user.username}</div>
@@ -373,7 +434,7 @@ export const UsersPage = () => {
                     e.stopPropagation();
                     handleUserAction(
                       user.id,
-                      user.status === "blocked" ? "unblock" : "block"
+                      user.status === "blocked" ? "unblock" : "block",
                     );
                   }}
                 >
@@ -389,6 +450,14 @@ export const UsersPage = () => {
                 >
                   🗑️
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  title="Adjust points / balance"
+                  onClick={(e) => handleOpenAdjustModal(e, user)}
+                >
+                  💰
+                </Button>
               </div>
             </div>
           ))}
@@ -401,6 +470,81 @@ export const UsersPage = () => {
               </div>
             </div>
           )}
+        </div>
+      )}
+      {adjustModalUser && (
+        <div className={styles.modalOverlay} onClick={handleCloseAdjustModal}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>Adjust: {adjustModalUser.username}</h2>
+              <button
+                onClick={handleCloseAdjustModal}
+                className={styles.closeButton}
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div
+                style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}
+              >
+                <Button
+                  variant={adjustType === "points" ? "primary" : "ghost"}
+                  size="sm"
+                  onClick={() => setAdjustType("points")}
+                >
+                  ⚡ Impulses
+                </Button>
+                <Button
+                  variant={adjustType === "balance" ? "primary" : "ghost"}
+                  size="sm"
+                  onClick={() => setAdjustType("balance")}
+                >
+                  💎 Echo
+                </Button>
+              </div>
+              <input
+                type="number"
+                placeholder="Amount (negative = subtract)"
+                value={adjustAmount}
+                onChange={(e) => setAdjustAmount(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "0.625rem 0.75rem",
+                  borderRadius: "var(--radius-md)",
+                  border: "1px solid var(--color-gray-300)",
+                  fontSize: "var(--font-size-base)",
+                  background: "var(--color-bg, #fff)",
+                  color: "var(--color-gray-800)",
+                  boxSizing: "border-box",
+                }}
+              />
+              <div
+                style={{
+                  display: "flex",
+                  gap: "0.5rem",
+                  marginTop: "1rem",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCloseAdjustModal}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleAdjust}
+                  disabled={adjustLoading || !adjustAmount}
+                >
+                  {adjustLoading ? "Loading..." : "Apply"}
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

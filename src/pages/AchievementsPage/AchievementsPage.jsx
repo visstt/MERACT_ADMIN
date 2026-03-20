@@ -11,10 +11,14 @@ export const AchievementsPage = () => {
   const [error, setError] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAwardModal, setShowAwardModal] = useState(false);
+  const [showRevokeModal, setShowRevokeModal] = useState(false);
   const [selectedAchievement, setSelectedAchievement] = useState(null);
   const [editingAchievement, setEditingAchievement] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState("");
+  const [revokeSelectedUserId, setRevokeSelectedUserId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [revokeSearchQuery, setRevokeSearchQuery] = useState("");
+  const [photoFile, setPhotoFile] = useState(null);
 
   const { users } = useUsers();
 
@@ -46,9 +50,13 @@ export const AchievementsPage = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/achievement/create-achievement", formData);
+      const data = new FormData();
+      data.append("name", formData.name);
+      if (photoFile) data.append("photo", photoFile);
+      await api.post("/achievement/create-achievement", data);
       setShowCreateModal(false);
       setFormData({ name: "", description: "", icon: "", rarity: "common" });
+      setPhotoFile(null);
       fetchAchievements();
     } catch (err) {
       const errorMsg =
@@ -63,7 +71,7 @@ export const AchievementsPage = () => {
     try {
       await api.put(
         `/achievement/update-achievement/${editingAchievement.id}`,
-        formData
+        formData,
       );
       setEditingAchievement(null);
       setFormData({ name: "", description: "", icon: "", rarity: "common" });
@@ -111,8 +119,29 @@ export const AchievementsPage = () => {
     }
   };
 
+  const handleRevokeAchievement = async () => {
+    if (!revokeSelectedUserId || !selectedAchievement) return;
+    try {
+      await api.post("/achievement/revoke", {
+        userId: parseInt(revokeSelectedUserId),
+        achievementId: selectedAchievement.id,
+      });
+      setShowRevokeModal(false);
+      setRevokeSelectedUserId("");
+      setSelectedAchievement(null);
+      setRevokeSearchQuery("");
+      toast.success("Achievement revoked successfully!");
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.message || "Failed to revoke achievement";
+      toast.error(errorMsg);
+      console.error(err);
+    }
+  };
+
   const openCreateModal = () => {
     setFormData({ name: "", description: "", icon: "", rarity: "common" });
+    setPhotoFile(null);
     setEditingAchievement(null);
     setShowCreateModal(true);
   };
@@ -124,6 +153,7 @@ export const AchievementsPage = () => {
       icon: achievement.icon || "",
       rarity: achievement.rarity || "common",
     });
+    setPhotoFile(null);
     setEditingAchievement(achievement);
     setShowCreateModal(true);
   };
@@ -133,9 +163,25 @@ export const AchievementsPage = () => {
     setShowAwardModal(true);
   };
 
+  const openRevokeModal = (e, achievement) => {
+    e.stopPropagation();
+    setSelectedAchievement(achievement);
+    setRevokeSelectedUserId("");
+    setRevokeSearchQuery("");
+    setShowRevokeModal(true);
+  };
+
+  const closeRevokeModal = () => {
+    setShowRevokeModal(false);
+    setSelectedAchievement(null);
+    setRevokeSelectedUserId("");
+    setRevokeSearchQuery("");
+  };
+
   const closeModal = () => {
     setShowCreateModal(false);
     setEditingAchievement(null);
+    setPhotoFile(null);
     setFormData({ name: "", description: "", icon: "", rarity: "common" });
   };
 
@@ -163,8 +209,16 @@ export const AchievementsPage = () => {
             className={styles.achievementCard}
             onClick={() => openAwardModal(achievement)}
           >
-            <div className={styles.achievementIcon}>
-              {achievement.icon || "🏆"}
+            <div className={styles.achievementImageWrap}>
+              {achievement.imageUrl ? (
+                <img
+                  src={achievement.imageUrl}
+                  alt={achievement.name}
+                  className={styles.achievementImage}
+                />
+              ) : (
+                <div className={styles.achievementPlaceholder}>🏆</div>
+              )}
             </div>
             <h3 className={styles.achievementTitle}>{achievement.name}</h3>
             <div
@@ -177,6 +231,13 @@ export const AchievementsPage = () => {
                 onClick={() => openEditModal(achievement)}
               >
                 Edit
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => openRevokeModal(e, achievement)}
+              >
+                Revoke
               </Button>
               <Button
                 variant="ghost"
@@ -213,41 +274,58 @@ export const AchievementsPage = () => {
                   required
                 />
               </div>
-              <div className={styles.formGroup}>
-                <label>Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Icon (emoji)</label>
-                <input
-                  type="text"
-                  value={formData.icon}
-                  onChange={(e) =>
-                    setFormData({ ...formData, icon: e.target.value })
-                  }
-                  placeholder="🏆"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Rarity</label>
-                <select
-                  value={formData.rarity}
-                  onChange={(e) =>
-                    setFormData({ ...formData, rarity: e.target.value })
-                  }
-                >
-                  <option value="common">Common</option>
-                  <option value="rare">Rare</option>
-                  <option value="epic">Epic</option>
-                  <option value="legendary">Legendary</option>
-                </select>
-              </div>
+              {!editingAchievement && (
+                <div className={styles.formGroup}>
+                  <label>Photo</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setPhotoFile(e.target.files[0] || null)}
+                  />
+                </div>
+              )}
+              {editingAchievement && (
+                <>
+                  <div className={styles.formGroup}>
+                    <label>Description</label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Icon (emoji)</label>
+                    <input
+                      type="text"
+                      value={formData.icon}
+                      onChange={(e) =>
+                        setFormData({ ...formData, icon: e.target.value })
+                      }
+                      placeholder="🏆"
+                    />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Rarity</label>
+                    <select
+                      value={formData.rarity}
+                      onChange={(e) =>
+                        setFormData({ ...formData, rarity: e.target.value })
+                      }
+                    >
+                      <option value="common">Common</option>
+                      <option value="rare">Rare</option>
+                      <option value="epic">Epic</option>
+                      <option value="legendary">Legendary</option>
+                    </select>
+                  </div>
+                </>
+              )}
               <div className={styles.modalActions}>
                 <Button type="button" variant="ghost" onClick={closeModal}>
                   Cancel
@@ -257,6 +335,95 @@ export const AchievementsPage = () => {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showRevokeModal && selectedAchievement && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h2>Revoke Achievement</h2>
+              <button className={styles.closeButton} onClick={closeRevokeModal}>
+                ×
+              </button>
+            </div>
+            <div className={styles.achievementInfo}>
+              <div
+                className={styles.achievementImageWrap}
+                style={{ margin: "0 auto 0.5rem" }}
+              >
+                {selectedAchievement.imageUrl ? (
+                  <img
+                    src={selectedAchievement.imageUrl}
+                    alt={selectedAchievement.name}
+                    className={styles.achievementImage}
+                  />
+                ) : (
+                  <div className={styles.achievementPlaceholder}>🏆</div>
+                )}
+              </div>
+              <h3>{selectedAchievement.name}</h3>
+            </div>
+            <div className={styles.formGroup}>
+              <label>Search User</label>
+              <input
+                type="text"
+                placeholder="Search by username or email..."
+                value={revokeSearchQuery}
+                onChange={(e) => setRevokeSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className={styles.userList}>
+              {users
+                .filter(
+                  (user) =>
+                    user.login
+                      ?.toLowerCase()
+                      .includes(revokeSearchQuery.toLowerCase()) ||
+                    user.email
+                      ?.toLowerCase()
+                      .includes(revokeSearchQuery.toLowerCase()),
+                )
+                .slice(0, 10)
+                .map((user) => (
+                  <div
+                    key={user.id}
+                    className={`${styles.userItem} ${
+                      revokeSelectedUserId === user.id.toString()
+                        ? styles.selected
+                        : ""
+                    }`}
+                    onClick={() => setRevokeSelectedUserId(user.id.toString())}
+                  >
+                    <div className={styles.userAvatar}>
+                      {user.login
+                        ? user.login.charAt(0).toUpperCase()
+                        : user.email.charAt(0).toUpperCase()}
+                    </div>
+                    <div className={styles.userDetails}>
+                      <div className={styles.userName}>
+                        {user.login || user.email.split("@")[0]}
+                      </div>
+                      <div className={styles.userEmail}>{user.email}</div>
+                    </div>
+                    {revokeSelectedUserId === user.id.toString() && (
+                      <div className={styles.checkmark}>✓</div>
+                    )}
+                  </div>
+                ))}
+            </div>
+            <div className={styles.modalActions}>
+              <Button type="button" variant="ghost" onClick={closeRevokeModal}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleRevokeAchievement}
+                disabled={!revokeSelectedUserId}
+              >
+                Revoke Achievement
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -271,8 +438,19 @@ export const AchievementsPage = () => {
               </button>
             </div>
             <div className={styles.achievementInfo}>
-              <div className={styles.achievementIconLarge}>
-                {selectedAchievement.icon || "🏆"}
+              <div
+                className={styles.achievementImageWrap}
+                style={{ margin: "0 auto 0.5rem" }}
+              >
+                {selectedAchievement.imageUrl ? (
+                  <img
+                    src={selectedAchievement.imageUrl}
+                    alt={selectedAchievement.name}
+                    className={styles.achievementImage}
+                  />
+                ) : (
+                  <div className={styles.achievementPlaceholder}>🏆</div>
+                )}
               </div>
               <h3>{selectedAchievement.name}</h3>
             </div>
@@ -294,7 +472,7 @@ export const AchievementsPage = () => {
                       .includes(searchQuery.toLowerCase()) ||
                     user.email
                       ?.toLowerCase()
-                      .includes(searchQuery.toLowerCase())
+                      .includes(searchQuery.toLowerCase()),
                 )
                 .slice(0, 10)
                 .map((user) => (
