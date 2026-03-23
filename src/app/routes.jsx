@@ -25,6 +25,9 @@ import { AdminChatPage } from "../pages/AdminChatPage";
 import { TasksPage } from "../pages/TasksPage";
 import { IntroPage } from "../pages/IntroPage";
 import { PoliciesPage } from "../pages/PoliciesPage";
+import { SupportPage } from "../pages/SupportPage";
+import { IconPacksPage } from "../pages/IconPacksPage";
+import { CategoriesPage } from "../pages/CategoriesPage";
 
 function getAccessToken() {
   // Example: look for cookie named access_token (or another name if server uses different one)
@@ -82,6 +85,22 @@ function Layout() {
     navigate(pagePath);
     setSidebarOpen(false); // close menu after navigation
   };
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch {
+      // ignore — still clear local state
+    } finally {
+      localStorage.removeItem("access");
+      localStorage.removeItem("profile");
+      sessionStorage.removeItem("access");
+      sessionStorage.removeItem("profile");
+      document.cookie = "access_token=; Max-Age=0; path=/";
+      document.cookie = "refresh_token=; Max-Age=0; path=/";
+      navigate("/admin/sign-in", { replace: true });
+    }
+  };
   const handleBurger = () => setSidebarOpen(true);
   const handleCloseSidebar = () => setSidebarOpen(false);
   const isMobile = window.innerWidth <= 768;
@@ -105,6 +124,7 @@ function Layout() {
           onToggleSidebar={handleBurger}
           isSidebarOpen={sidebarOpen}
           user={user}
+          onLogout={handleLogout}
         />
         <main className={styles.pageContent}>
           <Routes>
@@ -120,6 +140,9 @@ function Layout() {
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/intros" element={<IntroPage />} />
             <Route path="/policies" element={<PoliciesPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/icon-packs" element={<IconPacksPage />} />
+            <Route path="/categories" element={<CategoriesPage />} />
             {user?.role?.name === "main admin" && (
               <Route path="/admins" element={<AdminsPage />} />
             )}

@@ -117,7 +117,7 @@ export const TasksPage = () => {
     const now = new Date();
     const overdue = !d.isDone && d < now;
     return {
-      label: d.toLocaleDateString([], {
+      label: d.toLocaleDateString("en-US", {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -248,7 +248,7 @@ export const TasksPage = () => {
                       {task.isDone && task.doneAt && (
                         <span className={styles.metaChip}>
                           ✅{" "}
-                          {new Date(task.doneAt).toLocaleDateString([], {
+                          {new Date(task.doneAt).toLocaleDateString("en-US", {
                             day: "numeric",
                             month: "short",
                           })}
@@ -320,6 +320,7 @@ export const TasksPage = () => {
                 </label>
                 <input
                   type="datetime-local"
+                  lang="en"
                   value={formData.deadline}
                   onChange={(e) =>
                     setFormData({ ...formData, deadline: e.target.value })

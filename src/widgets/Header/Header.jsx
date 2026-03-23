@@ -2,7 +2,13 @@ import { useState, useEffect } from "react";
 import { Button } from "../../shared/ui";
 import styles from "./Header.module.css";
 
-export const Header = ({ title, onToggleSidebar, isSidebarOpen, user }) => {
+export const Header = ({
+  title,
+  onToggleSidebar,
+  isSidebarOpen,
+  user,
+  onLogout,
+}) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
@@ -10,7 +16,7 @@ export const Header = ({ title, onToggleSidebar, isSidebarOpen, user }) => {
   useEffect(() => {
     document.documentElement.setAttribute(
       "data-theme",
-      isDarkMode ? "dark" : "light"
+      isDarkMode ? "dark" : "light",
     );
   }, [isDarkMode]);
 
@@ -20,7 +26,7 @@ export const Header = ({ title, onToggleSidebar, isSidebarOpen, user }) => {
       localStorage.setItem("theme", newTheme ? "dark" : "light");
       document.documentElement.setAttribute(
         "data-theme",
-        newTheme ? "dark" : "light"
+        newTheme ? "dark" : "light",
       );
       return newTheme;
     });
@@ -58,6 +64,13 @@ export const Header = ({ title, onToggleSidebar, isSidebarOpen, user }) => {
               <span className={styles.userName}>{userName}</span>
             </button>
           </div>
+          <button
+            className={styles.actionButton}
+            onClick={onLogout}
+            title="Log out"
+          >
+            🚪
+          </button>
         </div>
       </div>
     </header>

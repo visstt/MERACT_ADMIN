@@ -22,6 +22,20 @@ export const RanksPage = () => {
 
   const { users } = useUsers();
 
+  const [iconMode, setIconMode] = useState("pack"); // "pack" | "upload"
+  const [activePack, setActivePack] = useState(null);
+  const [selectedIconPackItemId, setSelectedIconPackItemId] = useState(null);
+  const [photoFile, setPhotoFile] = useState(null);
+
+  const loadActivePack = async () => {
+    try {
+      const { data } = await api.get("/icon-pack/active?type=RANK");
+      setActivePack(data);
+    } catch {
+      setActivePack(null);
+    }
+  };
+
   const [formData, setFormData] = useState({
     name: "",
   });
@@ -47,9 +61,18 @@ export const RanksPage = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/rank/create-rank", formData);
+      const data = new FormData();
+      data.append("name", formData.name);
+      if (iconMode === "upload" && photoFile) {
+        data.append("photo", photoFile);
+      } else if (iconMode === "pack" && selectedIconPackItemId) {
+        data.append("iconPackItemId", String(selectedIconPackItemId));
+      }
+      await api.post("/rank/create-rank", data);
       setShowCreateModal(false);
       setFormData({ name: "" });
+      setPhotoFile(null);
+      setSelectedIconPackItemId(null);
       fetchRanks();
       toast.success("Rank created successfully!");
     } catch (err) {
@@ -145,8 +168,12 @@ export const RanksPage = () => {
 
   const openCreateModal = () => {
     setFormData({ name: "" });
+    setPhotoFile(null);
+    setSelectedIconPackItemId(null);
+    setIconMode("pack");
     setEditingRank(null);
     setShowCreateModal(true);
+    loadActivePack();
   };
 
   const openEditModal = (rank) => {
@@ -176,6 +203,8 @@ export const RanksPage = () => {
   const closeModal = () => {
     setShowCreateModal(false);
     setEditingRank(null);
+    setPhotoFile(null);
+    setSelectedIconPackItemId(null);
     setFormData({ name: "" });
   };
 
@@ -298,6 +327,59 @@ export const RanksPage = () => {
                   placeholder="Бывалый"
                 />
               </div>
+              {!editingRank && (
+                <div className={styles.formGroup}>
+                  <label>Icon</label>
+                  <div className={styles.iconModeTabs}>
+                    <button
+                      type="button"
+                      className={`${styles.iconModeTab} ${iconMode === "pack" ? styles.iconModeTabActive : ""}`}
+                      onClick={() => setIconMode("pack")}
+                    >
+                      From pack
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.iconModeTab} ${iconMode === "upload" ? styles.iconModeTabActive : ""}`}
+                      onClick={() => setIconMode("upload")}
+                    >
+                      Upload photo
+                    </button>
+                  </div>
+
+                  {iconMode === "upload" ? (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setPhotoFile(e.target.files[0] || null)}
+                    />
+                  ) : activePack && activePack.icons?.length > 0 ? (
+                    <div>
+                      <p className={styles.packHint}>
+                        Active pack: <b>{activePack.name}</b>
+                      </p>
+                      <div className={styles.iconPickerGrid}>
+                        {activePack.icons.map((icon) => (
+                          <button
+                            key={icon.id}
+                            type="button"
+                            className={`${styles.iconPickerItem} ${selectedIconPackItemId === icon.id ? styles.iconPickerItemSelected : ""}`}
+                            onClick={() => setSelectedIconPackItemId(icon.id)}
+                            title={icon.name}
+                          >
+                            <img src={icon.url} alt={icon.name} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className={styles.noPackHint}>
+                      No active rank pack. Go to Icon Packs to create and
+                      activate one, or use Upload photo.
+                    </p>
+                  )}
+                </div>
+              )}
               <div className={styles.modalActions}>
                 <Button type="button" variant="ghost" onClick={closeModal}>
                   Cancel
@@ -345,7 +427,7 @@ export const RanksPage = () => {
                       .includes(searchQuery.toLowerCase()) ||
                     user.email
                       ?.toLowerCase()
-                      .includes(searchQuery.toLowerCase())
+                      .includes(searchQuery.toLowerCase()),
                 )
                 .slice(0, 10)
                 .map((user) => (
@@ -421,7 +503,7 @@ export const RanksPage = () => {
                       .includes(searchQuery.toLowerCase()) ||
                     user.email
                       ?.toLowerCase()
-                      .includes(searchQuery.toLowerCase())
+                      .includes(searchQuery.toLowerCase()),
                 )
                 .slice(0, 10)
                 .map((user) => (

@@ -69,6 +69,24 @@ function getMenuItems(user) {
       icon: "📄",
       path: "/admin/policies",
     },
+    {
+      id: "support",
+      label: "Support",
+      icon: "🎫",
+      path: "/admin/support",
+    },
+    {
+      id: "icon-packs",
+      label: "Icon Packs",
+      icon: "🎨",
+      path: "/admin/icon-packs",
+    },
+    {
+      id: "categories",
+      label: "Categories",
+      icon: "🗂️",
+      path: "/admin/categories",
+    },
   ];
   if (user?.role?.name === "main admin") {
     items.push({

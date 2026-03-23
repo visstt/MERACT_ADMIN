@@ -211,7 +211,7 @@ export const StreamsPage = () => {
               >
                 {stream.thumbnailUrl ? (
                   <img
-                    src={`${import.meta.env.VITE_API_URL}${
+                    src={`${import.meta.env.VITE_API_URL.replace("/api", "")}${
                       stream.thumbnailUrl
                     }`}
                     alt={stream.title}

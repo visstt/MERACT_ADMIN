@@ -1,0 +1,308 @@
+.container {
+  padding: 24px;
+  max-width: 960px;
+}
+
+.header {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary, #fff);
+  margin: 0 0 4px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-secondary, #9ca3af);
+  margin: 0;
+}
+
+/* Stats */
+.stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat {
+  background: var(--surface-2, #1a1a2e);
+  border: 1px solid var(--border, #2d2d4e);
+  border-radius: 10px;
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 90px;
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary, #fff);
+}
+
+.statLabel {
+  font-size: 11px;
+  color: var(--text-secondary, #9ca3af);
+  margin-top: 2px;
+  text-align: center;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-2, #1a1a2e);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 20px;
+  width: fit-content;
+}
+
+.tab {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-secondary, #9ca3af);
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  background: var(--surface-3, #252540);
+  color: var(--text-primary, #fff);
+}
+
+.tabActive {
+  background: var(--accent, #6c63ff);
+  color: #fff !important;
+}
+
+/* Create form */
+.createForm {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.createInput {
+  flex: 1;
+  max-width: 360px;
+  background: var(--surface-2, #1a1a2e);
+  border: 1px solid var(--border, #2d2d4e);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text-primary, #fff);
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.createInput:focus {
+  outline: none;
+  border-color: var(--accent, #6c63ff);
+}
+
+/* Loading / Empty */
+.loading {
+  color: var(--text-secondary, #9ca3af);
+  padding: 40px 0;
+  text-align: center;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.emptyState span {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 15px;
+}
+
+/* Pack list */
+.packList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.packCard {
+  padding: 20px;
+}
+
+/* Pack header */
+.packHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.packInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.packName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+}
+
+.activeBadge {
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.iconCount {
+  font-size: 12px;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.packActions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Upload row */
+.uploadRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.uploadLabel {
+  cursor: pointer;
+}
+
+.uploadBtn {
+  display: inline-block;
+  background: var(--surface-3, #252540);
+  border: 1px dashed var(--border, #2d2d4e);
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 13px;
+  color: var(--text-secondary, #9ca3af);
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.uploadLabel:hover .uploadBtn {
+  border-color: var(--accent, #6c63ff);
+  color: var(--accent, #6c63ff);
+}
+
+.uploadHint {
+  font-size: 11px;
+  color: var(--text-secondary, #9ca3af);
+  opacity: 0.6;
+}
+
+/* Icons grid */
+.iconsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.iconItem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 64px;
+}
+
+.iconImg {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: var(--surface-3, #252540);
+  padding: 4px;
+}
+
+.iconDeleteBtn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: none;
+  color: #fff;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+  cursor: pointer;
+  padding: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconItem:hover .iconDeleteBtn {
+  display: flex;
+}
+
+.iconName {
+  font-size: 10px;
+  color: var(--text-secondary, #9ca3af);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  text-align: center;
+}
+
+.noIcons {
+  font-size: 13px;
+  color: var(--text-secondary, #9ca3af);
+  opacity: 0.6;
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 16px;
+  }
+
+  .createForm {
+    flex-direction: column;
+  }
+
+  .createInput {
+    max-width: 100%;
+  }
+
+  .stats {
+    flex-wrap: wrap;
+  }
+}

@@ -19,8 +19,20 @@ export const AchievementsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [revokeSearchQuery, setRevokeSearchQuery] = useState("");
   const [photoFile, setPhotoFile] = useState(null);
+  const [iconMode, setIconMode] = useState("pack"); // "pack" | "upload"
+  const [activePack, setActivePack] = useState(null);
+  const [selectedIconPackItemId, setSelectedIconPackItemId] = useState(null);
 
   const { users } = useUsers();
+
+  const loadActivePack = async () => {
+    try {
+      const { data } = await api.get("/icon-pack/active?type=ACHIEVEMENT");
+      setActivePack(data);
+    } catch {
+      setActivePack(null);
+    }
+  };
 
   const [formData, setFormData] = useState({
     name: "",
@@ -52,11 +64,16 @@ export const AchievementsPage = () => {
     try {
       const data = new FormData();
       data.append("name", formData.name);
-      if (photoFile) data.append("photo", photoFile);
+      if (iconMode === "upload" && photoFile) {
+        data.append("photo", photoFile);
+      } else if (iconMode === "pack" && selectedIconPackItemId) {
+        data.append("iconPackItemId", String(selectedIconPackItemId));
+      }
       await api.post("/achievement/create-achievement", data);
       setShowCreateModal(false);
       setFormData({ name: "", description: "", icon: "", rarity: "common" });
       setPhotoFile(null);
+      setSelectedIconPackItemId(null);
       fetchAchievements();
     } catch (err) {
       const errorMsg =
@@ -69,12 +86,21 @@ export const AchievementsPage = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
+      const data = new FormData();
+      data.append("name", formData.name);
+      if (iconMode === "upload" && photoFile) {
+        data.append("photo", photoFile);
+      } else if (iconMode === "pack" && selectedIconPackItemId) {
+        data.append("iconPackItemId", String(selectedIconPackItemId));
+      }
       await api.put(
         `/achievement/update-achievement/${editingAchievement.id}`,
-        formData,
+        data,
       );
       setEditingAchievement(null);
       setFormData({ name: "", description: "", icon: "", rarity: "common" });
+      setPhotoFile(null);
+      setSelectedIconPackItemId(null);
       fetchAchievements();
       toast.success("Achievement updated successfully!");
     } catch (err) {
@@ -142,8 +168,11 @@ export const AchievementsPage = () => {
   const openCreateModal = () => {
     setFormData({ name: "", description: "", icon: "", rarity: "common" });
     setPhotoFile(null);
+    setSelectedIconPackItemId(null);
+    setIconMode("pack");
     setEditingAchievement(null);
     setShowCreateModal(true);
+    loadActivePack();
   };
 
   const openEditModal = (achievement) => {
@@ -154,8 +183,11 @@ export const AchievementsPage = () => {
       rarity: achievement.rarity || "common",
     });
     setPhotoFile(null);
+    setSelectedIconPackItemId(null);
+    setIconMode("pack");
     setEditingAchievement(achievement);
     setShowCreateModal(true);
+    loadActivePack();
   };
 
   const openAwardModal = (achievement) => {
@@ -182,6 +214,7 @@ export const AchievementsPage = () => {
     setShowCreateModal(false);
     setEditingAchievement(null);
     setPhotoFile(null);
+    setSelectedIconPackItemId(null);
     setFormData({ name: "", description: "", icon: "", rarity: "common" });
   };
 
@@ -276,55 +309,114 @@ export const AchievementsPage = () => {
               </div>
               {!editingAchievement && (
                 <div className={styles.formGroup}>
-                  <label>Photo</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setPhotoFile(e.target.files[0] || null)}
-                  />
+                  <label>Icon</label>
+                  <div className={styles.iconModeTabs}>
+                    <button
+                      type="button"
+                      className={`${styles.iconModeTab} ${iconMode === "pack" ? styles.iconModeTabActive : ""}`}
+                      onClick={() => setIconMode("pack")}
+                    >
+                      From pack
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.iconModeTab} ${iconMode === "upload" ? styles.iconModeTabActive : ""}`}
+                      onClick={() => setIconMode("upload")}
+                    >
+                      Upload photo
+                    </button>
+                  </div>
+
+                  {iconMode === "upload" ? (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setPhotoFile(e.target.files[0] || null)}
+                    />
+                  ) : activePack && activePack.icons?.length > 0 ? (
+                    <div>
+                      <p className={styles.packHint}>
+                        Active pack: <b>{activePack.name}</b>
+                      </p>
+                      <div className={styles.iconPickerGrid}>
+                        {activePack.icons.map((icon) => (
+                          <button
+                            key={icon.id}
+                            type="button"
+                            className={`${styles.iconPickerItem} ${selectedIconPackItemId === icon.id ? styles.iconPickerItemSelected : ""}`}
+                            onClick={() => setSelectedIconPackItemId(icon.id)}
+                            title={icon.name}
+                          >
+                            <img src={icon.url} alt={icon.name} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className={styles.noPackHint}>
+                      No active achievement pack. Go to Icon Packs to create and
+                      activate one, or use Upload photo.
+                    </p>
+                  )}
                 </div>
               )}
               {editingAchievement && (
-                <>
-                  <div className={styles.formGroup}>
-                    <label>Description</label>
-                    <textarea
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          description: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Icon (emoji)</label>
-                    <input
-                      type="text"
-                      value={formData.icon}
-                      onChange={(e) =>
-                        setFormData({ ...formData, icon: e.target.value })
-                      }
-                      placeholder="🏆"
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Rarity</label>
-                    <select
-                      value={formData.rarity}
-                      onChange={(e) =>
-                        setFormData({ ...formData, rarity: e.target.value })
-                      }
+                <div className={styles.formGroup}>
+                  <label>
+                    Icon{" "}
+                    <span className={styles.opt}>
+                      optional — leave blank to keep current
+                    </span>
+                  </label>
+                  <div className={styles.iconModeTabs}>
+                    <button
+                      type="button"
+                      className={`${styles.iconModeTab} ${iconMode === "pack" ? styles.iconModeTabActive : ""}`}
+                      onClick={() => setIconMode("pack")}
                     >
-                      <option value="common">Common</option>
-                      <option value="rare">Rare</option>
-                      <option value="epic">Epic</option>
-                      <option value="legendary">Legendary</option>
-                    </select>
+                      From pack
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.iconModeTab} ${iconMode === "upload" ? styles.iconModeTabActive : ""}`}
+                      onClick={() => setIconMode("upload")}
+                    >
+                      Upload photo
+                    </button>
                   </div>
-                </>
+
+                  {iconMode === "upload" ? (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setPhotoFile(e.target.files[0] || null)}
+                    />
+                  ) : activePack && activePack.icons?.length > 0 ? (
+                    <div>
+                      <p className={styles.packHint}>
+                        Active pack: <b>{activePack.name}</b>
+                      </p>
+                      <div className={styles.iconPickerGrid}>
+                        {activePack.icons.map((icon) => (
+                          <button
+                            key={icon.id}
+                            type="button"
+                            className={`${styles.iconPickerItem} ${selectedIconPackItemId === icon.id ? styles.iconPickerItemSelected : ""}`}
+                            onClick={() => setSelectedIconPackItemId(icon.id)}
+                            title={icon.name}
+                          >
+                            <img src={icon.url} alt={icon.name} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className={styles.noPackHint}>
+                      No active achievement pack. Go to Icon Packs to create and
+                      activate one, or use Upload photo.
+                    </p>
+                  )}
+                </div>
               )}
               <div className={styles.modalActions}>
                 <Button type="button" variant="ghost" onClick={closeModal}>
