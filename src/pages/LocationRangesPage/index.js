@@ -1,0 +1,1 @@
+export { LocationRangesPage } from "./LocationRangesPage";
