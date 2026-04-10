@@ -68,7 +68,21 @@
   margin-top: 1.5rem;
 }
 
+.achievementsBlock {
+  background: var(--color-white);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem 1rem;
+  margin-top: 1.5rem;
+}
+
 [data-theme="dark"] .membersBlock {
+  background: var(--color-dark-surface);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  color: var(--color-dark-text);
+}
+
+[data-theme="dark"] .achievementsBlock {
   background: var(--color-dark-surface);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   color: var(--color-dark-text);
@@ -116,8 +130,35 @@
   gap: 0.7rem;
 }
 
+.achievementsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
 [data-theme="dark"] .membersList {
   color: var(--color-dark-text);
+}
+
+[data-theme="dark"] .achievementsList {
+  color: var(--color-dark-text);
+}
+
+.achievementControls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.blockSubtitle {
+  margin: 0.35rem 0 0;
+  color: var(--color-gray-600);
+  font-size: 0.96rem;
+}
+
+[data-theme="dark"] .blockSubtitle {
+  color: var(--color-dark-text-muted);
 }
 
 .memberCard {
@@ -202,6 +243,86 @@
 
 [data-theme="dark"] .kickButton:hover {
   background: var(--color-error);
+}
+
+.kickButton:disabled,
+.inviteButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.achievementCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--color-gray-100);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+}
+
+[data-theme="dark"] .achievementCard {
+  background: var(--color-dark-surface-hover);
+}
+
+.achievementMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.achievementImage {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--color-gray-100);
+}
+
+[data-theme="dark"] .achievementImage {
+  background: var(--color-dark-surface);
+}
+
+.achievementPlaceholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-weight: 700;
+}
+
+[data-theme="dark"] .achievementPlaceholder {
+  background: var(--color-primary-dark);
+  color: var(--color-dark-text);
+}
+
+.achievementInfo {
+  min-width: 0;
+}
+
+.achievementName {
+  font-weight: 700;
+  color: var(--color-gray-900);
+}
+
+[data-theme="dark"] .achievementName {
+  color: var(--color-dark-text);
+}
+
+.achievementDescription {
+  margin-top: 0.2rem;
+  color: var(--color-gray-600);
+  font-size: 0.95rem;
+}
+
+[data-theme="dark"] .achievementDescription {
+  color: var(--color-dark-text-muted);
 }
 
 .empty {
@@ -320,6 +441,17 @@
   }
   .membersBlock {
     padding: 1rem 0.3rem;
+  }
+  .achievementsBlock {
+    padding: 1rem 0.3rem;
+  }
+  .achievementControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .achievementCard {
+    flex-direction: column;
+    align-items: stretch;
   }
   .inviteModal {
     padding: 1.2rem 0.7rem;
