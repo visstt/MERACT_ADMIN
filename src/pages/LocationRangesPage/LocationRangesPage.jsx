@@ -13,6 +13,7 @@ const EMPTY_FORM = {
 };
 
 const getRangeId = (range) => range?.id ?? range?._id;
+const normalizeId = (id) => (id == null ? null : String(id));
 
 const sortRanges = (ranges) =>
   [...ranges].sort((a, b) => {
@@ -23,8 +24,8 @@ const sortRanges = (ranges) =>
 
 const hasOverlap = (candidate, ranges, editingId) =>
   ranges.some((range) => {
-    const rangeId = getRangeId(range);
-    if (rangeId === editingId || !range.isActive) return false;
+    const rangeId = normalizeId(getRangeId(range));
+    if (rangeId === normalizeId(editingId) || !range.isActive) return false;
     return !(candidate.maxKm < range.minKm || candidate.minKm > range.maxKm);
   });
 
@@ -47,8 +48,8 @@ const validateForm = (form, ranges, editingId) => {
   }
 
   const duplicateOrder = ranges.some((range) => {
-    const rangeId = getRangeId(range);
-    return rangeId !== editingId && Number(range.order) === order;
+    const rangeId = normalizeId(getRangeId(range));
+    return rangeId !== normalizeId(editingId) && Number(range.order) === order;
   });
   if (duplicateOrder) return "Order must be unique";
 
