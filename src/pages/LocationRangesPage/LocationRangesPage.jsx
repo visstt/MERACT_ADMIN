@@ -26,7 +26,13 @@ const hasOverlap = (candidate, ranges, editingId) =>
   ranges.some((range) => {
     const rangeId = normalizeId(getRangeId(range));
     if (rangeId === normalizeId(editingId) || !range.isActive) return false;
-    return !(candidate.maxKm < range.minKm || candidate.minKm > range.maxKm);
+    const currentMin = Number(range.minKm);
+    const currentMax = Number(range.maxKm);
+    const candidateMin = Number(candidate.minKm);
+    const candidateMax = Number(candidate.maxKm);
+
+    // Treat "touching edges" as non-overlap: [0, 500] and [500, 1000] are allowed.
+    return candidateMin < currentMax && candidateMax > currentMin;
   });
 
 const validateForm = (form, ranges, editingId) => {
