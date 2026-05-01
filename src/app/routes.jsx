@@ -27,7 +27,6 @@ import { IntroPage } from "../pages/IntroPage";
 import { PoliciesPage } from "../pages/PoliciesPage";
 import { SupportPage } from "../pages/SupportPage";
 import { IconPacksPage } from "../pages/IconPacksPage";
-import { CategoriesPage } from "../pages/CategoriesPage";
 import { LocationRangesPage } from "../pages/LocationRangesPage";
 
 function getAccessToken() {
@@ -143,7 +142,6 @@ function Layout() {
             <Route path="/policies" element={<PoliciesPage />} />
             <Route path="/support" element={<SupportPage />} />
             <Route path="/icon-packs" element={<IconPacksPage />} />
-            <Route path="/categories" element={<CategoriesPage />} />
             <Route
               path="/location-ranges"
               element={<LocationRangesPage />}
@@ -154,6 +152,7 @@ function Layout() {
             {user?.role?.name === "main admin" && (
               <Route path="/hero-video" element={<HeroVideoPage />} />
             )}
+            <Route path="*" element={<Navigate to="/admin/" replace />} />
           </Routes>
         </main>
       </div>

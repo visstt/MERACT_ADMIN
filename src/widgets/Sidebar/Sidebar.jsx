@@ -36,12 +36,6 @@ function getMenuItems(user) {
       path: "/admin/icon-packs",
     },
     {
-      id: "categories",
-      label: "Categories",
-      icon: "CT",
-      path: "/admin/categories",
-    },
-    {
       id: "location-ranges",
       label: "Location Ranges",
       icon: "LR",
