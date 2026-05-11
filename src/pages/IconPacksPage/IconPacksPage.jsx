@@ -4,7 +4,19 @@ import api from "../../shared/lib/axios";
 import { toast } from "react-toastify";
 import styles from "./IconPacksPage.module.css";
 
-const TYPES = ["ACHIEVEMENT", "RANK"];
+const TYPES = ["ACHIEVEMENT", "RANK", "TASK"];
+
+const TYPE_LABELS = {
+  ACHIEVEMENT: "Achievements",
+  RANK: "Ranks",
+  TASK: "Task Icons",
+};
+
+const TYPE_EMPTY_ICONS = {
+  ACHIEVEMENT: "A",
+  RANK: "R",
+  TASK: "T",
+};
 
 export const IconPacksPage = () => {
   const [type, setType] = useState("ACHIEVEMENT");
@@ -32,7 +44,6 @@ export const IconPacksPage = () => {
     fetchPacks();
   }, [fetchPacks]);
 
-  // Create a new pack
   const handleCreatePack = async (e) => {
     e.preventDefault();
     if (!newPackName.trim()) return;
@@ -41,7 +52,7 @@ export const IconPacksPage = () => {
       await api.post("/icon-pack", { name: newPackName.trim(), type });
       setNewPackName("");
       fetchPacks();
-      toast.success("Pack created!");
+      toast.success("Pack created");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to create pack");
     } finally {
@@ -49,7 +60,6 @@ export const IconPacksPage = () => {
     }
   };
 
-  // Upload icons to a pack
   const handleUploadIcons = async (packId, files) => {
     if (!files || files.length === 0) return;
     setUploadingPackId(packId);
@@ -58,21 +68,19 @@ export const IconPacksPage = () => {
       Array.from(files).forEach((f) => form.append("icons", f));
       const { data } = await api.post(`/icon-pack/${packId}/upload`, form);
       toast.success(
-        `Uploaded ${data.uploaded ?? files.length} icon${files.length !== 1 ? "s" : ""}!`,
+        `Uploaded ${data.uploaded ?? files.length} icon${files.length !== 1 ? "s" : ""}`,
       );
       fetchPacks();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to upload icons");
     } finally {
       setUploadingPackId(null);
-      // Reset file input
       if (fileInputRefs.current[packId]) {
         fileInputRefs.current[packId].value = "";
       }
     }
   };
 
-  // Activate a pack
   const handleActivate = async (packId) => {
     setActivatingId(packId);
     try {
@@ -80,7 +88,7 @@ export const IconPacksPage = () => {
       setPacks((prev) =>
         prev.map((p) => ({ ...p, isActive: p.id === packId })),
       );
-      toast.success("Pack activated!");
+      toast.success("Pack activated");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to activate pack");
     } finally {
@@ -88,7 +96,6 @@ export const IconPacksPage = () => {
     }
   };
 
-  // Delete a pack
   const handleDeletePack = async (packId) => {
     if (!confirm("Delete this pack and all its icons from S3?")) return;
     try {
@@ -100,7 +107,6 @@ export const IconPacksPage = () => {
     }
   };
 
-  // Delete a single icon
   const handleDeleteIcon = async (iconId, packId) => {
     try {
       await api.delete(`/icon-pack/icons/${iconId}`);
@@ -124,17 +130,15 @@ export const IconPacksPage = () => {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Icon Packs</h1>
           <p className={styles.subtitle}>
-            Manage icon sets for achievements and ranks
+            Manage icon sets for achievements, ranks, and tasks
           </p>
         </div>
       </div>
 
-      {/* Stats */}
       <div className={styles.stats}>
         <div className={styles.stat}>
           <span className={styles.statValue}>{packs.length}</span>
@@ -145,14 +149,13 @@ export const IconPacksPage = () => {
           <span className={styles.statLabel}>Icons</span>
         </div>
         <div className={styles.stat}>
-          <span className={styles.statValue}>{activePack ? "✓" : "—"}</span>
+          <span className={styles.statValue}>{activePack ? "Yes" : "No"}</span>
           <span className={styles.statLabel}>
             {activePack ? activePack.name : "No active pack"}
           </span>
         </div>
       </div>
 
-      {/* Type tabs */}
       <div className={styles.tabs}>
         {TYPES.map((t) => (
           <button
@@ -160,30 +163,28 @@ export const IconPacksPage = () => {
             className={`${styles.tab} ${type === t ? styles.tabActive : ""}`}
             onClick={() => setType(t)}
           >
-            {t === "ACHIEVEMENT" ? "🏅 Achievements" : "🎖️ Ranks"}
+            {TYPE_LABELS[t]}
           </button>
         ))}
       </div>
 
-      {/* Create pack form */}
       <form className={styles.createForm} onSubmit={handleCreatePack}>
         <input
           className={styles.createInput}
-          placeholder={`New ${type.toLowerCase()} pack name…`}
+          placeholder={`New ${TYPE_LABELS[type].toLowerCase()} pack name...`}
           value={newPackName}
           onChange={(e) => setNewPackName(e.target.value)}
         />
         <Button type="submit" disabled={creating || !newPackName.trim()}>
-          {creating ? "Creating…" : "+ Create pack"}
+          {creating ? "Creating..." : "+ Create pack"}
         </Button>
       </form>
 
-      {/* Pack list */}
       {loading ? (
-        <div className={styles.loading}>Loading…</div>
+        <div className={styles.loading}>Loading...</div>
       ) : packs.length === 0 ? (
         <div className={styles.emptyState}>
-          <span>{type === "ACHIEVEMENT" ? "🏅" : "🎖️"}</span>
+          <span>{TYPE_EMPTY_ICONS[type]}</span>
           <p>No packs yet. Create your first icon pack above.</p>
         </div>
       ) : (
@@ -192,12 +193,11 @@ export const IconPacksPage = () => {
             const iconCount = pack._count?.icons ?? pack.icons?.length ?? 0;
             return (
               <Card key={pack.id} className={styles.packCard}>
-                {/* Pack header */}
                 <div className={styles.packHeader}>
                   <div className={styles.packInfo}>
                     <span className={styles.packName}>{pack.name}</span>
                     {pack.isActive && (
-                      <span className={styles.activeBadge}>✅ Active</span>
+                      <span className={styles.activeBadge}>Active</span>
                     )}
                     <span className={styles.iconCount}>
                       {iconCount} icon{iconCount !== 1 ? "s" : ""}
@@ -210,7 +210,7 @@ export const IconPacksPage = () => {
                         onClick={() => handleActivate(pack.id)}
                         disabled={activatingId === pack.id}
                       >
-                        {activatingId === pack.id ? "…" : "Activate"}
+                        {activatingId === pack.id ? "..." : "Activate"}
                       </Button>
                     )}
                     <Button
@@ -218,12 +218,11 @@ export const IconPacksPage = () => {
                       size="sm"
                       onClick={() => handleDeletePack(pack.id)}
                     >
-                      🗑️
+                      Delete
                     </Button>
                   </div>
                 </div>
 
-                {/* Upload icons */}
                 <div className={styles.uploadRow}>
                   <label className={styles.uploadLabel}>
                     <input
@@ -240,8 +239,8 @@ export const IconPacksPage = () => {
                     />
                     <span className={styles.uploadBtn}>
                       {uploadingPackId === pack.id
-                        ? "Uploading…"
-                        : "⬆ Upload icons"}
+                        ? "Uploading..."
+                        : "Upload icons"}
                     </span>
                   </label>
                   <span className={styles.uploadHint}>
@@ -249,7 +248,6 @@ export const IconPacksPage = () => {
                   </span>
                 </div>
 
-                {/* Icons grid */}
                 {pack.icons && pack.icons.length > 0 ? (
                   <div className={styles.iconsGrid}>
                     {pack.icons.map((icon) => (
@@ -265,7 +263,7 @@ export const IconPacksPage = () => {
                           onClick={() => handleDeleteIcon(icon.id, pack.id)}
                           title="Delete icon"
                         >
-                          ×
+                          X
                         </button>
                         <span className={styles.iconName}>{icon.name}</span>
                       </div>
@@ -273,7 +271,7 @@ export const IconPacksPage = () => {
                   </div>
                 ) : (
                   <div className={styles.noIcons}>
-                    No icons yet — upload some above
+                    No icons yet - upload some above
                   </div>
                 )}
               </Card>

@@ -41,6 +41,12 @@ function getMenuItems(user) {
       icon: "LR",
       path: "/admin/location-ranges",
     },
+    {
+      id: "action-costs",
+      label: "Action Costs",
+      icon: "FC",
+      path: "/admin/action-costs",
+    },
   ];
 
   if (user?.role?.name === "main admin") {

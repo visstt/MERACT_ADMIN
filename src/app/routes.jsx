@@ -28,6 +28,7 @@ import { PoliciesPage } from "../pages/PoliciesPage";
 import { SupportPage } from "../pages/SupportPage";
 import { IconPacksPage } from "../pages/IconPacksPage";
 import { LocationRangesPage } from "../pages/LocationRangesPage";
+import { ActionCostsPage } from "../pages/ActionCostsPage";
 
 function getAccessToken() {
   // Example: look for cookie named access_token (or another name if server uses different one)
@@ -142,6 +143,7 @@ function Layout() {
             <Route path="/policies" element={<PoliciesPage />} />
             <Route path="/support" element={<SupportPage />} />
             <Route path="/icon-packs" element={<IconPacksPage />} />
+            <Route path="/action-costs" element={<ActionCostsPage />} />
             <Route
               path="/location-ranges"
               element={<LocationRangesPage />}
