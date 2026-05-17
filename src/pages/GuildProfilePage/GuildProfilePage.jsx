@@ -19,6 +19,9 @@ export const GuildProfilePage = () => {
   const [inviteValue, setInviteValue] = useState("");
   const [inviteLoading, setInviteLoading] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
+  const [joinRequests, setJoinRequests] = useState([]);
+  const [joinRequestsLoading, setJoinRequestsLoading] = useState(false);
+  const [requestActionId, setRequestActionId] = useState(null);
   const [achievementId, setAchievementId] = useState("");
   const [awardLoading, setAwardLoading] = useState(false);
   const [revokeLoadingId, setRevokeLoadingId] = useState(null);
@@ -60,11 +63,25 @@ export const GuildProfilePage = () => {
     }
   }, [id]);
 
+  const fetchJoinRequests = useCallback(async () => {
+    setJoinRequestsLoading(true);
+    try {
+      const res = await api.get(`/guild/${id}/join-requests`);
+      setJoinRequests(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Failed to load join requests:", err);
+      setJoinRequests([]);
+    } finally {
+      setJoinRequestsLoading(false);
+    }
+  }, [id]);
+
   useEffect(() => {
     fetchGuild();
     fetchAchievementsCatalog();
     fetchGuildAchievements();
-  }, [fetchGuild, fetchAchievementsCatalog, fetchGuildAchievements]);
+    fetchJoinRequests();
+  }, [fetchGuild, fetchAchievementsCatalog, fetchGuildAchievements, fetchJoinRequests]);
 
   useEffect(() => {
     if (inviteOpen && allUsers.length === 0) {
@@ -97,12 +114,20 @@ export const GuildProfilePage = () => {
     if (!inviteValue) return;
     setInviteLoading(true);
     try {
+      const selectedUser = allUsers.find((u) => String(u.id) === String(inviteValue));
+      const userLookup = selectedUser?.login || selectedUser?.email;
+      if (!userLookup) {
+        toast.error("Selected user has no login/email");
+        setInviteLoading(false);
+        return;
+      }
+
       await api.post(
         "/guild/invite-user",
         {},
         {
           params: {
-            userId: inviteValue,
+            user: userLookup,
             guildId: id,
           },
         },
@@ -183,6 +208,22 @@ export const GuildProfilePage = () => {
     }
   };
 
+  const handleJoinRequestAction = async (requestId, action) => {
+    setRequestActionId(requestId);
+    try {
+      await api.post(`/guild/join-requests/${requestId}/${action}`);
+      await Promise.all([fetchGuild(), fetchJoinRequests()]);
+      toast.success(
+        action === "approve" ? "Request approved" : "Request rejected",
+      );
+    } catch (err) {
+      console.error(`Failed to ${action} join request:`, err);
+      toast.error(err.response?.data?.message || "Failed to process request");
+    } finally {
+      setRequestActionId(null);
+    }
+  };
+
   if (loading) return <div className={styles.guildProfilePage}>Loading...</div>;
   if (error) return <div className={styles.guildProfilePage}>{error}</div>;
   if (!guild) return null;
@@ -239,6 +280,52 @@ export const GuildProfilePage = () => {
               </button>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className={styles.membersBlock}>
+        <div className={styles.membersHeader}>
+          <h2>Join Requests</h2>
+        </div>
+        <div className={styles.membersList}>
+          {joinRequestsLoading ? (
+            <div className={styles.empty}>Loading join requests...</div>
+          ) : joinRequests.length === 0 ? (
+            <div className={styles.empty}>No pending requests</div>
+          ) : (
+            joinRequests.map((request) => (
+              <div key={request.id} className={styles.memberCard}>
+                <div className={styles.memberAvatar}>
+                  {(request.user?.login || request.user?.email || "?")[0].toUpperCase()}
+                </div>
+                <div className={styles.memberInfo}>
+                  <div className={styles.memberName}>
+                    {request.user?.login || request.user?.email || "Unknown user"}
+                  </div>
+                  <div className={styles.memberEmail}>{request.user?.email || ""}</div>
+                  {request.message ? (
+                    <div className={styles.requestMessage}>{request.message}</div>
+                  ) : null}
+                </div>
+                <div className={styles.requestActions}>
+                  <button
+                    className={styles.inviteButton}
+                    onClick={() => handleJoinRequestAction(request.id, "approve")}
+                    disabled={requestActionId === request.id}
+                  >
+                    {requestActionId === request.id ? "Processing..." : "Approve"}
+                  </button>
+                  <button
+                    className={styles.kickButton}
+                    onClick={() => handleJoinRequestAction(request.id, "reject")}
+                    disabled={requestActionId === request.id}
+                  >
+                    {requestActionId === request.id ? "Processing..." : "Reject"}
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

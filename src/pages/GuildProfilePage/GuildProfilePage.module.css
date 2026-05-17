@@ -251,6 +251,22 @@
   cursor: not-allowed;
 }
 
+.requestActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.requestMessage {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--color-gray-600);
+  word-break: break-word;
+}
+
+[data-theme="dark"] .requestMessage {
+  color: var(--color-dark-text-muted);
+}
+
 .achievementCard {
   display: flex;
   align-items: center;
